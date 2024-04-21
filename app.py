@@ -2,11 +2,11 @@ from flask import Flask, jsonify, request
 import psycopg2
 
 app = Flask(__name__)
-
+password = input("Enter password: ")
 db_params = {
     'dbname': 'defaultdb',
     'user': 'avnadmin',
-    'password': 'AVNS_QxzPpkrNJXOolRyltc4',
+    'password': password,
     'host': 'car-rental-car-rreennttaall.e.aivencloud.com',
     'port': '22365'
 }
