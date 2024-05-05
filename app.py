@@ -83,5 +83,51 @@ def log_in_staff():
         cur.close()
         conn.close()
 
+@app.route('/register', methods=['POST'])
+def register_user():
+    conn = connect_to_db()
+    cur = conn.cursor()
+    data = request.get_json()
+    city_id = 0
+    country_id = 0
+
+    cur.execute(f"""SELECT city_id FROM city WHERE city = '{data['adress']['city']}'""")
+    existing_city = cur.fetchone()
+    if existing_city:
+        city_id = existing_city[0]
+    else:
+        cur.execute(f"INSERT INTO city (city) VALUES ('{data['adress']['city']}') RETURNING city_id")
+        city_id = cur.fetchone()[0]
+
+    cur.execute(f"""SELECT country_id FROM country WHERE country = '{data['adress']['country']}'""")
+    existing_country = cur.fetchone()
+    if existing_country:
+        country_id = existing_city[0]
+    else:
+        cur.execute(f"INSERT INTO country (country) VALUES ('{data['adress']['country']}') RETURNING country_id")
+        country_id = cur.fetchone()[0]
+
+    cur.execute(f"""INSERT INTO address (postal_code, city_id, address_1, address_2, country_id) VALUES ('{data['adress']['post_code']}',
+     '{city_id}', '{data['adress']['street']}', '{data['adress']['street_number']}', '{country_id}') RETURNING address_id""")
+    address_id = cur.fetchone()[0]
+
+    cur.execute(f"""SELECT customer_id FROM customer 
+                    WHERE first_name = '{data['first_name']}' 
+                    AND last_name = '{data['last_name']}' 
+                    AND mail = '{data['email']}' 
+                    AND date_of_birth = '{data['date_of_birth']}' 
+                    AND phone_no = '{data['phone_number']}'""")
+    existing_customer = cur.fetchone()
+    if existing_customer:
+        return jsonify({'error': 'Customer already exists'}), 400
+
+    cur.execute(f"""INSERT INTO customer(address_id, first_name, last_name, mail, password, date_of_birth, phone_no) 
+    VALUES ('{address_id}', '{data['first_name']}', '{data['last_name']}', '{data['email']}', '{data['password']}', 
+    '{data['date_of_birth']}', '{data['phone_number']}')""")
+
+    conn.commit()
+
+    return jsonify({f'Success mr./mrs. {data['first_name']} {data['last_name']}, you have been registered': True}), 200
+
 if __name__ == '__main__':
     app.run(debug=True)
