@@ -155,3 +155,5 @@ class RegisterScreen(Screen):
 
     def switch_to_main_screen(self, instance):
         self.manager.current = 'main'
+
+#siemka
