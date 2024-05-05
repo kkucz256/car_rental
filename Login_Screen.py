@@ -60,7 +60,7 @@ class LoginScreen(Screen):
 
         self.username_text = TextInput(multiline=False, size_hint=(None, None), width=200, height=30)
         password = Label(text='Password:', size_hint=(None, None), size=(200, 50))
-        self.password_text = TextInput(multiline=False, size_hint=(None, None), width=200, height=30)
+        self.password_text = TextInput(multiline=False, size_hint=(None, None), width=200, height=30,password=True)
 
         back_button = Button(text='Back', size_hint=(None, None), size=(200, 50))
         login_button = Button(text='Login', size_hint=(None, None), size=(200, 50))
