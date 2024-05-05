@@ -78,12 +78,30 @@ class LoginScreen(Screen):
 
         self.add_widget(layout)
         back_button.bind(on_press=self.switch_to_main_screen)
-        login_button.bind(on_press=self.manager_access)
+
+        if info=='staff':
+            login_button.bind(on_press=self.manager_access)
+        else:
+            login_button.bind(on_press=self.user_access)
 
     def switch_to_main_screen(self, instance):
         self.manager.current = 'main'
 
     def manager_access(self, instance):
+        login_credentials = {
+            'email': self.username_text.text,
+            'password': sha256_hash(self.password_text.text)
+        }
+        url = 'http://127.0.0.1:5000/log-in_staff'
+        response = requests.get(url, json=login_credentials)
+        if response.status_code == 200:
+            self.manager.current = 'manager'
+        elif response.status_code == 400:
+            print(f"No such user {self.username_text.text}")
+        elif response.status_code == 300:
+            print("Wrong password")
+
+    def user_access(self, instance):
         login_credentials = {
             'email': self.username_text.text,
             'password': sha256_hash(self.password_text.text)
@@ -94,7 +112,7 @@ class LoginScreen(Screen):
             self.manager.current = 'manager'
         elif response.status_code == 400:
             print(f"No such user {self.username_text.text}")
-        elif response.status_code ==300:
+        elif response.status_code == 300:
             print("Wrong password")
 
 
