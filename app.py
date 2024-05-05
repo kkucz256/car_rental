@@ -43,6 +43,25 @@ def add_car():
     conn.close()
     return f'Car {brand_name} added successfully!'
 
+@app.route('/log-in', methods=['GET'])
+def log_in():
+    conn = connect_to_db()
+    cur = conn.cursor()
+    data = request.get_json()
+
+    cur.execute(f"""SELECT password FROM customer WHERE mail = '{data['email']}'""")
+    try:
+        db_password = cur.fetchone()[0]
+        print(db_password, data['password'])
+        if db_password == data['password']:
+            return jsonify({'success': True}), 200
+        else:
+            return jsonify({'Wrong password': True}), 300
+    except:
+        return jsonify({'error': 'Wrong username or password'}), 400
+    finally:
+        cur.close()
+        conn.close()
 
 if __name__ == '__main__':
     app.run(debug=True)
