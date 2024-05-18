@@ -58,7 +58,7 @@ def add_car():
 
     cur.close()
     conn.close()
-    return f'Car {brand_name} added successfully!'
+    jsonify({f'Car {brand_name} added successfully': True}), 200
 
 @app.route('/log-in', methods=['GET'])
 def log_in():

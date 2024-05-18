@@ -77,8 +77,10 @@ class ManagerScreen(Screen):
 
         url = 'http://127.0.0.1:5000/cars'
         response = requests.post(url, json=car_data)
+        response_json = response.json()
+        message = list(response_json.keys())[0]
         if response.status_code == 200:
-            print(response.content.decode('utf-8')['Success'])
+            self.show_car('Success', message)
         elif response.status_code == 400:
             print("Bad request! Car data is invalid.")
         else:
@@ -86,3 +88,7 @@ class ManagerScreen(Screen):
 
     def go_back(self, instance):
         self.manager.current = 'staff'
+
+    def show_popup(self, title, message):
+        popup = Popup(title=title, content=Label(text=message), size_hint=(None, None), size=(400, 200))
+        popup.open()
