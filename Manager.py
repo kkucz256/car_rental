@@ -6,6 +6,8 @@ from kivy.uix.label import Label
 from kivy.uix.screenmanager import Screen
 from kivy.uix.textinput import TextInput
 from kivy.uix.button import Button
+from kivy.uix.scrollview import ScrollView
+from kivy.uix.gridlayout import GridLayout
 
 last_rental_beginning = datetime(2024, 4, 19)
 last_rental_end = datetime(2024, 4, 21)
@@ -17,61 +19,70 @@ class ManagerScreen(Screen):
     def __init__(self, **kwargs):
         super(ManagerScreen, self).__init__(**kwargs)
 
-        layout = BoxLayout(orientation='vertical', padding=20, spacing=10, size_hint=(None, None), width=400,
-                           height=400)
+        layout = GridLayout(cols=2, spacing=10, size_hint_y=None)
+        layout.bind(minimum_height=layout.setter('height'))
+        component_width = 200
+        component_height = 50
+        input_height = 30
 
-        titles = ['Price per day:', 'Year:', 'Horsepower:', 'Max velocity:', 'Seats no:']
+        self.titles = ['Brand name:', 'Price per day:', 'Year of production:', 'Horsepower:', 'Engine type:', 'Body:',
+                  'Color:', 'Max velocity:', 'Gearbox:', 'Seats no:', 'Deposit:', 'Photo URL:']
+        self.text_inputs = {}
 
-        self.text_inputs = []
-        for title in titles:
-            title_label = Label(text=title, size_hint_x=None, width=100, halign='right', pos_hint={'center_x': 0.5})
-            layout.add_widget(title_label)
-
-            text_input = TextInput(multiline=False, size_hint=(None, None), width=200, height=30,
-                                   pos_hint={'center_x': 0.5})
+        for title in self.titles:
+            layout.add_widget(Label(text=title, size_hint_y=None, height=component_height))
+            text_input = TextInput(multiline=False, size_hint_y=None, height=input_height)
             layout.add_widget(text_input)
-            self.text_inputs.append(text_input)
+            self.text_inputs[title] = text_input
 
-        add_button = Button(text='Add', size_hint=(None, None), width=200, height=30, pos_hint={'center_x': 0.5})
-        layout.add_widget(add_button)
+        scroll_view = ScrollView(size_hint=(0.8, None), size=(600, 500), pos_hint={'center_x': 0.47})
+        scroll_view.add_widget(layout)
 
-        add_button.bind(on_press=self.extract_data)
+        screen_layout = BoxLayout(orientation='vertical', spacing=10)
+        screen_layout.add_widget(scroll_view)
 
-        layout.pos_hint = {'center_x': 0.5, 'center_y': 0.5}
+        button_layout = BoxLayout(size_hint=(None, None), height=component_height, spacing=10,
+                                  pos_hint={'center_x': 0.3})
+        back_button = Button(text='Back', size_hint=(None, None), size=(component_width, component_height))
+        add_button = Button(text='Add', size_hint=(None, None), size=(component_width, component_height))
+        button_layout.add_widget(back_button)
+        button_layout.add_widget(add_button)
 
-        self.add_widget(layout)
+        screen_layout.add_widget(button_layout)
+        self.add_widget(screen_layout)
+        back_button.bind(on_press=self.go_back)
+        add_button.bind(on_press=self.add_data)
 
-    def extract_data(self, instance):
-        price = self.text_inputs[0].text
-        year = self.text_inputs[1].text
-        hpw = self.text_inputs[2].text
-        velocity = self.text_inputs[3].text
-        seats = self.text_inputs[4].text
+
+    def add_data(self, instance):
 
         car_data = {
-            'brand_id': 1,
+            'brand_name': self.text_inputs['Brand name:'].text,
             'status': 'free',
-            'price_per_day': price,
-            'year_of_production': year,
-            'horsepower': hpw,
-            'engine_type': 'diesel',
-            'body': 'wagon',
-            'color_id': 1,
-            'max_velocity': velocity,
-            'gearbox': 'manual',
-            'seats_no': seats,
-            'deposit': 1000,
+            'price_per_day': self.text_inputs['Price per day:'].text,
+            'year_of_production': self.text_inputs['Year of production:'].text,
+            'horsepower': self.text_inputs['Horsepower:'].text,
+            'engine_type': self.text_inputs['Engine type:'].text,
+            'body': self.text_inputs['Body:'].text,
+            'color_name': self.text_inputs['Color:'].text,
+            'max_velocity': self.text_inputs['Max velocity:'],
+            'gearbox': self.text_inputs['Gearbox:'].text,
+            'seats_no': self.text_inputs['Seats no:'].text,
+            'deposit': self.text_inputs['Deposit:'].text,
             'last_rental_beginning': formatted_last_rental_beginning,
             'last_rental_end': formatted_last_rental_end,
             'place_id': 1,
-            'photo': "https://i.imgur.com"
+            'photo': self.text_inputs['Photo URL:'].text
         }
 
         url = 'http://127.0.0.1:5000/cars'
         response = requests.post(url, json=car_data)
         if response.status_code == 200:
-            print(response.content.decode('utf-8'))
+            print(response.content.decode('utf-8')['Success'])
         elif response.status_code == 400:
             print("Bad request! Car data is invalid.")
         else:
             print(f"An error occurred! Status code: {response.status_code}")
+
+    def go_back(self, instance):
+        self.manager.current = 'staff'
