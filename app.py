@@ -27,11 +27,28 @@ def add_car():
     cur = conn.cursor()
     data = request.get_json()
 
+
+    cur.execute(f"SELECT brand_id FROM brand WHERE brand = '{data['brand_name']}'")
+    existing_brand = cur.fetchone()
+    if existing_brand:
+        brand_id = existing_brand[0]
+    else:
+        cur.execute(f"INSERT INTO brand (brand) VALUES ('{data['brand_name']}') RETURNING brand_id")
+        brand_id = cur.fetchone()[0]
+
+    cur.execute(f"SELECT color_id FROM color WHERE color = '{data['color_name']}'")
+    existing_color = cur.fetchone()
+    if existing_color:
+        color_id = existing_color[0]
+    else:
+        cur.execute(f"INSERT INTO color (color) VALUES ('{data['color_name']}') RETURNING color_id")
+        color_id = cur.fetchone()[0]
+
     cur.execute(f"""INSERT INTO car (brand_id, status, price_per_day, year_of_production,
                 horsepower, engine_type, body, color_id, max_velocity, gearbox, seats_no,
-                deposit, last_rental_beginning, last_rental_end, place_id, photo) VALUES ('{data['brand_id']}',
+                deposit, last_rental_beginning, last_rental_end, place_id, photo) VALUES ({brand_id},
                  '{data['status']}', '{data['price_per_day']}', '{data['year_of_production']}', '{data['horsepower']}',
-                  '{data['engine_type']}', '{data['body']}', '{data['color_id']}', '{data['max_velocity']}',
+                  '{data['engine_type']}', '{data['body']}', {color_id}, '{data['max_velocity']}',
                    '{data['gearbox']}', '{data['seats_no']}', '{data['deposit']}', '{data['last_rental_beginning']}',
                     '{data['last_rental_end']}', '{data['place_id']}', '{data['photo']}')""")
     conn.commit()
@@ -88,8 +105,6 @@ def register_user():
     conn = connect_to_db()
     cur = conn.cursor()
     data = request.get_json()
-    city_id = 0
-    country_id = 0
 
     cur.execute(f"""SELECT city_id FROM city WHERE city = '{data['address']['city']}'""")
     existing_city = cur.fetchone()
