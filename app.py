@@ -91,24 +91,26 @@ def register_user():
     city_id = 0
     country_id = 0
 
-    cur.execute(f"""SELECT city_id FROM city WHERE city = '{data['adress']['city']}'""")
+    cur.execute(f"""SELECT city_id FROM city WHERE city = '{data['address']['city']}'""")
     existing_city = cur.fetchone()
     if existing_city:
         city_id = existing_city[0]
     else:
-        cur.execute(f"INSERT INTO city (city) VALUES ('{data['adress']['city']}') RETURNING city_id")
+        cur.execute(f"INSERT INTO city (city) VALUES ('{data['address']['city']}') RETURNING city_id")
         city_id = cur.fetchone()[0]
 
-    cur.execute(f"""SELECT country_id FROM country WHERE country = '{data['adress']['country']}'""")
+    cur.execute(f"""SELECT country_id FROM country WHERE country = '{data['address']['country']}'""")
     existing_country = cur.fetchone()
     if existing_country:
-        country_id = existing_city[0]
+        country_id = existing_country[0]
     else:
-        cur.execute(f"INSERT INTO country (country) VALUES ('{data['adress']['country']}') RETURNING country_id")
+        cur.execute(f"INSERT INTO country (country) VALUES ('{data['address']['country']}') RETURNING country_id")
         country_id = cur.fetchone()[0]
 
-    cur.execute(f"""INSERT INTO address (postal_code, city_id, address_1, address_2, country_id) VALUES ('{data['adress']['post_code']}',
-     '{city_id}', '{data['adress']['street']}', '{data['adress']['street_number']}', '{country_id}') RETURNING address_id""")
+    cur.execute(f"""
+        INSERT INTO address (postal_code, city_id, address_1, address_2, country_id)
+        VALUES ('{data['address']['post_code']}', '{city_id}', '{data['address']['address_1']}', '{data['address']['address_2']}', '{country_id}') RETURNING address_id
+    """)
     address_id = cur.fetchone()[0]
 
     cur.execute(f"""SELECT customer_id FROM customer 

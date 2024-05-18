@@ -3,6 +3,7 @@ from kivy.uix.screenmanager import ScreenManager
 
 from Manager import ManagerScreen
 from Login_Screen import *
+from User_Screen import UserScreen
 
 
 class Car_rental(App):
@@ -18,6 +19,8 @@ class Car_rental(App):
         self.screen_manager.add_widget(register_screen)
         manager_screen = ManagerScreen(name='manager')
         self.screen_manager.add_widget(manager_screen)
+        user_screen = UserScreen(name='user')
+        self.screen_manager.add_widget(user_screen)
 
         return self.screen_manager
 
