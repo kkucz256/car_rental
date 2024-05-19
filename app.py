@@ -46,19 +46,16 @@ def add_car():
 
     cur.execute(f"""INSERT INTO car (brand_id, status, price_per_day, year_of_production,
                 horsepower, engine_type, body, color_id, max_velocity, gearbox, seats_no,
-                deposit, last_rental_beginning, last_rental_end, place_id, photo) VALUES ({brand_id},
+                deposit, last_rental_beginning, last_rental_end, place_id, photo, model) VALUES ({brand_id},
                  '{data['status']}', '{data['price_per_day']}', '{data['year_of_production']}', '{data['horsepower']}',
                   '{data['engine_type']}', '{data['body']}', {color_id}, '{data['max_velocity']}',
                    '{data['gearbox']}', '{data['seats_no']}', '{data['deposit']}', '{data['last_rental_beginning']}',
-                    '{data['last_rental_end']}', '{data['place_id']}', '{data['photo']}')""")
+                    '{data['last_rental_end']}', '{data['place_id']}', '{data['photo']}', '{data['model']}')""")
     conn.commit()
-    brand_id = data['brand_id']
-    cur.execute(f"SELECT brand FROM brand WHERE brand_id = {brand_id}")
-    brand_name = cur.fetchone()[0] if cur.rowcount > 0 else None
 
     cur.close()
     conn.close()
-    jsonify({f'Car {brand_name} added successfully': True}), 200
+    return jsonify({f'Car {data['brand_name']} added successfully': True}), 200
 
 @app.route('/log-in', methods=['GET'])
 def log_in():
@@ -75,7 +72,7 @@ def log_in():
         else:
             return jsonify({'Wrong password': True}), 300
     except:
-        return jsonify({'error': 'Wrong username or password'}), 400
+        return jsonify({'Wrong username or password': True}), 400
     finally:
         cur.close()
         conn.close()
@@ -95,7 +92,7 @@ def log_in_staff():
         else:
             return jsonify({'Wrong password': True}), 300
     except:
-        return jsonify({'error': 'Wrong username or password'}), 400
+        return jsonify({'Wrong username or password': True}), 400
     finally:
         cur.close()
         conn.close()

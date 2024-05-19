@@ -8,6 +8,7 @@ from User_Screen import UserScreen
 
 class Car_rental(App):
     def build(self):
+        Window.clearcolor = (49 / 255, 54 / 255, 63 / 255, 1)
         self.screen_manager = ScreenManager()
         main_screen = MainScreen(name='main')
         self.screen_manager.add_widget(main_screen)

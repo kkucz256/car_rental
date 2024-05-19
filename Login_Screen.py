@@ -8,6 +8,7 @@ from kivy.uix.popup import Popup
 from kivy.uix.scrollview import ScrollView
 from kivy.uix.gridlayout import GridLayout
 from Manager import ManagerScreen
+from kivy.core.window import Window
 import hashlib
 
 
@@ -20,11 +21,14 @@ def sha256_hash(data):
 class MainScreen(Screen):
     def __init__(self, **kwargs):
         super(MainScreen, self).__init__(**kwargs)
-
+        self.button_color = (34 / 255, 40 / 255, 49 / 255, 1)
         label = Label(text='Welcome', size_hint=(None, None), size=(200, 50))
-        login_button = Button(text='Log-in as user', size_hint=(None, None), size=(200, 50))
-        login_staff_button = Button(text='Log-in as staff', size_hint=(None, None), size=(200, 50))
-        register_button = Button(text='Register', size_hint=(None, None), size=(200, 50))
+        login_button = Button(text='Log-in as user', background_color=self.button_color, size_hint=(None, None),
+                              size=(200, 50))
+        login_staff_button = Button(text='Log-in as staff', background_color=self.button_color, size_hint=(None, None),
+                                    size=(200, 50))
+        register_button = Button(text='Register', background_color=self.button_color, size_hint=(None, None),
+                                 size=(200, 50))
 
         layout = BoxLayout(orientation='vertical', spacing=10, size_hint=(None, None), size=(200, 200),
                            pos_hint={'center_x': 0.5, 'center_y': 0.5})
@@ -51,6 +55,7 @@ class MainScreen(Screen):
 
 class LoginScreen(Screen):
     def __init__(self, info, **kwargs):
+        self.button_color = (34 / 255, 40 / 255, 49 / 255, 1)
         super(LoginScreen, self).__init__(**kwargs)
         self.orientation = 'vertical'
 
@@ -67,8 +72,8 @@ class LoginScreen(Screen):
         password = Label(text='Password:', size_hint=(None, None), size=(200, 50))
         self.password_text = TextInput(multiline=False, size_hint=(None, None), width=200, height=30, password=True)
 
-        back_button = Button(text='Back', size_hint=(None, None), size=(200, 50))
-        login_button = Button(text='Login', size_hint=(None, None), size=(200, 50))
+        back_button = Button(text='Back',background_color=self.button_color, size_hint=(None, None), size=(200, 50))
+        login_button = Button(text='Login',background_color=self.button_color, size_hint=(None, None), size=(200, 50))
         layout = BoxLayout(orientation='vertical', spacing=10, size_hint=(None, None), size=(200, 200),
                            pos_hint={'center_x': 0.5, 'center_y': 0.4})
 
@@ -95,31 +100,38 @@ class LoginScreen(Screen):
             'email': self.username_text.text,
             'password': sha256_hash(self.password_text.text)
         }
-        url = 'http://127.0.0.1:5000/log-in_staff'
-        response = requests.get(url, json=login_credentials)
-        message = list(response_json.keys())[0]
-        if response.status_code == 200:
-            self.manager.current = 'manager'
-        elif response.status_code == 400:
-            self.show_popup("Error", message)
-        elif response.status_code == 300:
-            self.show_popup("Error", message)
+        if login_credentials['email'] and login_credentials['password']:
+            url = 'http://127.0.0.1:5000/log-in_staff'
+            response = requests.get(url, json=login_credentials)
+            response_json = response.json()
+            message = list(response_json.keys())[0]
+            if response.status_code == 200:
+                self.manager.current = 'manager'
+            elif response.status_code == 400:
+                self.show_popup('Error', message)
+            elif response.status_code == 300:
+                self.show_popup('Error', message)
+        else:
+            self.show_popup('Error', 'Provide credentials')
 
     def user_access(self, instance):
         login_credentials = {
             'email': self.username_text.text,
             'password': sha256_hash(self.password_text.text)
         }
-        url = 'http://127.0.0.1:5000/log-in'
-        response = requests.get(url, json=login_credentials)
-        response_json = response.json()
-        message = list(response_json.keys())[0]
-        if response.status_code == 200:
-            self.manager.current = 'manager'
-        elif response.status_code == 400:
-            self.show_popup("Error", message)
-        elif response.status_code == 300:
-            self.show_popup("Error", message)
+        if login_credentials['email'] and login_credentials['password']:
+            url = 'http://127.0.0.1:5000/log-in'
+            response = requests.get(url, json=login_credentials)
+            response_json = response.json()
+            message = list(response_json.keys())[0]
+            if response.status_code == 200:
+                self.manager.current = 'user'
+            elif response.status_code == 400:
+                self.show_popup('Error', message)
+            elif response.status_code == 300:
+                self.show_popup('Error', message)
+        else:
+            self.show_popup('Error', 'Provide credentials')
 
     def show_popup(self, title, message):
         popup = Popup(title=title, content=Label(text=message), size_hint=(None, None), size=(400, 200))
@@ -135,6 +147,7 @@ class RegisterScreen(Screen):
         component_width = 200
         component_height = 50
         input_height = 30
+        self.button_color = (34 / 255, 40 / 255, 49 / 255, 1)
 
         self.labels = ['E-mail:', 'Phone number:', 'Date of birth (YYYY/MM/DD):', 'First name:', 'Last name:', 'City:',
                        'Country:',
@@ -160,8 +173,8 @@ class RegisterScreen(Screen):
 
         button_layout = BoxLayout(size_hint=(None, None), height=component_height, spacing=10,
                                   pos_hint={'center_x': 0.3})
-        back_button = Button(text='Back', size_hint=(None, None), size=(component_width, component_height))
-        register_button = Button(text='Register', size_hint=(None, None), size=(component_width, component_height))
+        back_button = Button(text='Back', size_hint=(None, None),background_color=self.button_color, size=(component_width, component_height))
+        register_button = Button(text='Register', size_hint=(None, None),background_color=self.button_color, size=(component_width, component_height))
         button_layout.add_widget(back_button)
         button_layout.add_widget(register_button)
 
