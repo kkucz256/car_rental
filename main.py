@@ -4,10 +4,12 @@ from kivy.uix.screenmanager import ScreenManager
 from Manager import ManagerScreen
 from Login_Screen import *
 from User_Screen import UserScreen
+from kivy.config import Config
 
 
 class Car_rental(App):
     def build(self):
+        Config.set('kivy', 'window_icon', 'path_to_your_icon.ico')
         Window.clearcolor = (49 / 255, 54 / 255, 63 / 255, 1)
         self.screen_manager = ScreenManager()
         main_screen = MainScreen(name='main')

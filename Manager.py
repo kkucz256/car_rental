@@ -53,6 +53,8 @@ class ManagerScreen(Screen):
         button_layout.add_widget(back_button)
         button_layout.add_widget(add_button)
 
+        screen_layout.add_widget(button_layout)
+
         self.add_widget(screen_layout)
         back_button.bind(on_press=self.go_back)
         add_button.bind(on_press=self.add_data)
