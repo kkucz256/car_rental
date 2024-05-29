@@ -104,6 +104,7 @@ def log_in():
         cur.close()
         conn.close()
 
+
 @app.route('/log-in_staff', methods=['GET'])
 def log_in_staff():
     conn = connect_to_db()
@@ -144,13 +145,15 @@ def register_user():
     if existing_country:
         country_id = existing_country[0]
     else:
-        cur.execute("INSERT INTO country (country) VALUES (%s) RETURNING country_id", (data['address']['country'].capitalize(),))
+        cur.execute("INSERT INTO country (country) VALUES (%s) RETURNING country_id",
+                    (data['address']['country'].capitalize(),))
         country_id = cur.fetchone()[0]
 
     cur.execute("""
         INSERT INTO address (postal_code, city_id, address_1, address_2, country_id)
         VALUES (%s, %s, %s, %s, %s) RETURNING address_id
-    """, (data['address']['post_code'], city_id, data['address']['address_1'], data['address']['address_2'], country_id))
+    """, (
+    data['address']['post_code'], city_id, data['address']['address_1'], data['address']['address_2'], country_id))
 
     address_id = cur.fetchone()[0]
 
@@ -203,9 +206,9 @@ def get_car_details(car_id):
         conn = connect_to_db()
         cur = conn.cursor()
         cur.execute("""
-            SELECT car.car_id, brand.brand, car.status, color.color, car.model, car.price_per_day, car.body,
-                   car.gearbox, car.seats_no, car.year_of_production, car.horsepower, car.engine_type, 
-                   car.max_velocity, car.deposit, car.last_rental_end   
+            SELECT car.car_id, brand.brand, car.status, car.price_per_day, car.year_of_production, car.horsepower, 
+            car.engine_type,car.body, color.color, car.max_velocity, car.gearbox,
+            car.seats_no,car.deposit,  car.last_rental_end,car.model
             FROM car 
             JOIN brand ON car.brand_id = brand.brand_id 
             JOIN color ON car.color_id = color.color_id
@@ -215,12 +218,13 @@ def get_car_details(car_id):
         conn.close()
         if row:
             car = Car_details_class(*row)
+            print(car.__dict__)
             return jsonify(car.__dict__)
         else:
             return jsonify({"error": "Car not found"}), 404
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+
 if __name__ == '__main__':
     app.run(debug=True)
-
