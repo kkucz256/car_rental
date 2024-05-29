@@ -1,5 +1,6 @@
 from flask import Flask, jsonify, request
 import psycopg2
+from Car_details_class import Car_details_class
 
 app = Flask(__name__)
 db_params = {
@@ -51,20 +52,20 @@ def add_car():
     cur = conn.cursor()
     data = request.get_json()
 
-    cur.execute(f"SELECT brand_id FROM brand WHERE brand = %s", (data['brand_name'],))
+    cur.execute(f"SELECT brand_id FROM brand WHERE brand = %s", (data['brand_name'].capitalize(),))
     existing_brand = cur.fetchone()
     if existing_brand:
         brand_id = existing_brand[0]
     else:
-        cur.execute(f"INSERT INTO brand (brand) VALUES (%s) RETURNING brand_id", (data['brand_name'],))
+        cur.execute(f"INSERT INTO brand (brand) VALUES (%s) RETURNING brand_id", (data['brand_name'].capitalize(),))
         brand_id = cur.fetchone()[0]
 
-    cur.execute("SELECT color_id FROM color WHERE color = %s", (data['color_name'],))
+    cur.execute("SELECT color_id FROM color WHERE color = %s", (data['color_name'].capitalize(),))
     existing_color = cur.fetchone()
     if existing_color:
         color_id = existing_color[0]
     else:
-        cur.execute("INSERT INTO color (color) VALUES (%s) RETURNING color_id", (data['color_name'],))
+        cur.execute("INSERT INTO color (color) VALUES (%s) RETURNING color_id", (data['color_name'].capitalize(),))
         color_id = cur.fetchone()[0]
 
     cur.execute("""INSERT INTO car (brand_id, status, price_per_day, year_of_production,
@@ -72,8 +73,8 @@ def add_car():
                     deposit, last_rental_beginning, last_rental_end, place_id, photo, model) 
                     VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)""",
                 (brand_id, data['status'], data['price_per_day'], data['year_of_production'],
-                 data['horsepower'], data['engine_type'], data['body'], color_id,
-                 data['max_velocity'], data['gearbox'], data['seats_no'], data['deposit'],
+                 data['horsepower'], data['engine_type'].lower(), data['body'].lower(), color_id,
+                 data['max_velocity'], data['gearbox'].lower(), data['seats_no'], data['deposit'],
                  data['last_rental_beginning'], data['last_rental_end'], data['place_id'],
                  data['photo'], data['model']))
     conn.commit()
@@ -130,20 +131,20 @@ def register_user():
     cur = conn.cursor()
     data = request.get_json()
 
-    cur.execute("SELECT city_id FROM city WHERE city = %s", (data['address']['city'],))
+    cur.execute("SELECT city_id FROM city WHERE city = %s", (data['address']['city'].capitalize(),))
     existing_city = cur.fetchone()
     if existing_city:
         city_id = existing_city[0]
     else:
-        cur.execute("INSERT INTO city (city) VALUES (%s) RETURNING city_id", (data['address']['city'],))
+        cur.execute("INSERT INTO city (city) VALUES (%s) RETURNING city_id", (data['address']['city'].capitalize(),))
         city_id = cur.fetchone()[0]
 
-    cur.execute("SELECT country_id FROM country WHERE country = %s", (data['address']['country'],))
+    cur.execute("SELECT country_id FROM country WHERE country = %s", (data['address']['country'].capitalize(),))
     existing_country = cur.fetchone()
     if existing_country:
         country_id = existing_country[0]
     else:
-        cur.execute("INSERT INTO country (country) VALUES (%s) RETURNING country_id", (data['address']['country'],))
+        cur.execute("INSERT INTO country (country) VALUES (%s) RETURNING country_id", (data['address']['country'].capitalize(),))
         country_id = cur.fetchone()[0]
 
     cur.execute("""
@@ -190,10 +191,36 @@ def provide_cars():
             car = Car_for_list(row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7])
             car_list.append(car)
         conn.close()
+        return jsonify([car.__dict__ for car in car_list])
     except Exception as e:
         print("Error:", e)
-    return jsonify([car.__dict__ for car in car_list])
+        return jsonify({"error": str(e)}), 500
 
+
+@app.route('/car-details/<int:car_id>', methods=['GET'])
+def get_car_details(car_id):
+    try:
+        conn = connect_to_db()
+        cur = conn.cursor()
+        cur.execute("""
+            SELECT car.car_id, brand.brand, car.status, color.color, car.model, car.price_per_day, car.body,
+                   car.gearbox, car.seats_no, car.year_of_production, car.horsepower, car.engine_type, 
+                   car.max_velocity, car.deposit, car.last_rental_end   
+            FROM car 
+            JOIN brand ON car.brand_id = brand.brand_id 
+            JOIN color ON car.color_id = color.color_id
+            WHERE car.car_id = %s
+        """, (car_id,))
+        row = cur.fetchone()
+        conn.close()
+        if row:
+            car = Car_details_class(*row)
+            return jsonify(car.__dict__)
+        else:
+            return jsonify({"error": "Car not found"}), 404
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
     app.run(debug=True)
+

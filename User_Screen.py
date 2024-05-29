@@ -20,8 +20,6 @@ class UserScreen(Screen):
 
         self.cars=[]
 
-
-
         super(UserScreen, self).__init__(**kwargs)
 
         self.button_color = (34 / 255, 40 / 255, 49 / 255, 1)
@@ -33,10 +31,8 @@ class UserScreen(Screen):
 
 
     def create_layout(self):
-        # Usunięcie istniejących widżetów
         self.clear_widgets()
 
-        # Create a ScrollView
         scrollview = ScrollView(do_scroll_x=False, do_scroll_y=True)
 
         car_list_layout = GridLayout(cols=1, size_hint_y=None, padding=10, spacing=10)
@@ -54,17 +50,18 @@ class UserScreen(Screen):
                 size_hint_x=0.6,
                 height=120,
                 background_normal='',
-                background_color=(0.5, 0.5, 0.5, 1),  # Gray color
-                color=(1, 1, 1, 1),  # White text
+                background_color=(0.5, 0.5, 0.5, 1),
+                color=(1, 1, 1, 1),
                 halign='center',
                 valign='middle',
                 border=(0, 0, 0, 1),
                 padding=[0, 10, 0, 10]
             )
             car_button.bind(size=lambda btn, *args: setattr(btn, 'text_size', (btn.width, None)))
+            car_button.bind(on_press=lambda btn, car_id=car.id: self.car_details(car_id))
             car_list_layout.add_widget(car_button)
 
-        # Add the GridLayout to the ScrollView
+
         scrollview.add_widget(car_list_layout)
 
         back_button = Button(text='Back', size_hint=(None, None), background_color=self.button_color,
@@ -74,7 +71,7 @@ class UserScreen(Screen):
         button_layout.add_widget(back_button)
 
         main_layout = BoxLayout(orientation='vertical',
-                                padding=[100, 30, 100, 30])  # Add margins (left, top, right, bottom)
+                                padding=[100, 30, 100, 30])
         main_layout.add_widget(scrollview)
 
         self.add_widget(main_layout)
@@ -96,7 +93,7 @@ class UserScreen(Screen):
         url = 'http://127.0.0.1:5000/user-screen'
         response = requests.get(url)
         response_json = response.json()
-
+        self.cars = []
         for elem in response_json:
             self.cars.append(
                 Car_for_list(elem['id'], elem['brand'], elem['color'], elem['model'], elem['price_per_day'],
@@ -111,3 +108,7 @@ class UserScreen(Screen):
 
     def on_leave(self):
         Window.size = (800, 600)
+
+    def car_details(self, car_id):
+        self.manager.get_screen('car').set_car_id(car_id)
+        self.manager.current = 'car'
