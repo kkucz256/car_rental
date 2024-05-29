@@ -197,15 +197,15 @@ def provide_cars():
         return jsonify({"error": str(e)}), 500
 
 
-@app.route('/car-details/<int:car_id>', methods=['GET'])
-def get_car_details(car_id):
+@app.route('/car-details/<int:carid>', methods=['GET'])
+def getcardetails(carid):
     try:
         conn = connect_to_db()
         cur = conn.cursor()
         cur.execute("""
-            SELECT car.car_id, brand.brand, car.status, color.color, car.model, car.price_per_day, car.body,
-                   car.gearbox, car.seats_no, car.year_of_production, car.horsepower, car.engine_type, 
-                   car.max_velocity, car.deposit, car.last_rental_end   
+            SELECT car.car_id, brand.brand, car.status, car.price_per_day, car.year_of_production, car.horsepower, 
+            car.engine_type,car.body, color.color, car.max_velocity, car.gearbox,
+            car.seats_no,car.deposit,  car.last_rental_end,car.model
             FROM car 
             JOIN brand ON car.brand_id = brand.brand_id 
             JOIN color ON car.color_id = color.color_id
@@ -215,7 +215,8 @@ def get_car_details(car_id):
         conn.close()
         if row:
             car = Car_details_class(*row)
-            return jsonify(car.__dict__)
+            print(car.__dict)
+            return jsonify(car.__dict)
         else:
             return jsonify({"error": "Car not found"}), 404
     except Exception as e:
