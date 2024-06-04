@@ -8,6 +8,7 @@ from kivy.uix.slider import Slider
 import requests
 from Car_details_class import Car_details_class
 from kivy.uix.image import Image
+from kivy.uix.image import AsyncImage
 import sys
 
 # Tutaj dawaj importy z tej ścieżki
@@ -31,7 +32,8 @@ class CarDetails(Screen):
         self.add_widget(self.layout)
 
     def on_pre_enter(self):
-        self.layout.clear_widgets()
+
+
         if self.car_id:
             url = f'http://127.0.0.1:5000/car-details/{self.car_id}'
             response = requests.get(url)
@@ -41,7 +43,8 @@ class CarDetails(Screen):
                     car_data['id'], car_data['brand'], car_data['status'], car_data['price_per_day'],
                     car_data['year_of_production'], car_data['horsepower'], car_data['engine_type'],
                     car_data['body'], car_data['color'], car_data['max_velocity'], car_data['gearbox'],
-                    car_data['seats_no'], car_data['deposit'], car_data['last_rental_end'], car_data['model']
+                    car_data['seats_no'], car_data['deposit'], car_data['last_rental_end'], car_data['model'],
+                    car_data['photo']
                 )
                 self.details_dict = {
                     "Body ": self.car.body,
@@ -49,7 +52,9 @@ class CarDetails(Screen):
                     "Number of seats ": self.car.seats_no,
                     "Year of production ": self.car.year_of_production,
                     "Horsepower ": self.car.horsepower}
+
                 self.update_layout()
+
             else:
                 self.layout.add_widget(Label(text=car_data['error']))
         else:
@@ -62,7 +67,20 @@ class CarDetails(Screen):
         self.user_id = user_id
 
     def update_layout(self):
+        self.clear_widgets()
+        self.layout.clear_widgets()
+        self.add_widget(self.layout)
         self.layout.add_widget(Label())
+
+        upper_left_layout = BoxLayout(orientation='vertical', pos_hint={'center_x': 0.4895, 'center_y': 0.9})
+        self.img = AsyncImage(source=self.car.photo)
+        self.img.size = (500, 400)
+        self.img.size_hint = (None, None)
+        # self.img.pos_hint = {'center_x': 0.09, 'center_y': 0.9}
+        upper_left_layout.add_widget(self.img)
+        self.add_widget(upper_left_layout)
+
+
 
         upper_right_layout = BoxLayout(orientation='vertical', pos_hint={'right': 1, 'top': 1})
         main_info_label = CustomLabel(
@@ -96,7 +114,7 @@ class CarDetails(Screen):
         buttons_layout.add_widget(self.buy_button)
         self.add_widget(buttons_layout)
 
-        self.bottom_left_layout = BoxLayout(orientation='vertical', spacing=10, size_hint=(.5, .3),
+        bottom_left_layout = BoxLayout(orientation='vertical', spacing=10, size_hint=(.5, .3),
                                             pos_hint={'center_y': 0.3})
         self.s = Slider(orientation='horizontal', min=1, max=30, value=7, step=1, value_track=True)
         self.s.bind(value=self.update_price_label)
@@ -105,11 +123,13 @@ class CarDetails(Screen):
         self.days_label = CustomLabel(text=f"Choose the amount of days: {self.days}", font_size=15,
                                       pos_hint={'center_x': 0.5})
         self.price_label = CustomLabel(text=f"Price: {self.price}", font_size=15, pos_hint={'center_x': 0.5})
-        self.bottom_left_layout.add_widget(self.days_label)
-        self.bottom_left_layout.add_widget(self.s)
-        self.bottom_left_layout.add_widget(self.price_label)
+        bottom_left_layout.clear_widgets()
+        bottom_left_layout.add_widget(self.days_label)
+        bottom_left_layout.add_widget(self.s)
+        bottom_left_layout.add_widget(self.price_label)
 
-        self.add_widget(self.bottom_left_layout)
+        self.add_widget(bottom_left_layout)
+
 
         self.buy_button.bind(
             on_press=lambda btn: self.reservation(self.car_id, self.price, self.days))

@@ -209,7 +209,7 @@ def getcardetails(car_id):
         cur.execute("""
             SELECT car.car_id, brand.brand, car.status, car.price_per_day, car.year_of_production, car.horsepower, 
             car.engine_type,car.body, color.color, car.max_velocity, car.gearbox,
-            car.seats_no,car.deposit,  car.last_rental_end,car.model
+            car.seats_no,car.deposit,  car.last_rental_end,car.model,car.photo
             FROM car 
             JOIN brand ON car.brand_id = brand.brand_id 
             JOIN color ON car.color_id = color.color_id

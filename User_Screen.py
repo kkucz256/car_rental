@@ -45,7 +45,8 @@ class UserScreen(Screen):
         self.img.pos_hint = {'center_x': 0.09, 'center_y': 0.9}
         self.clear_widgets()
 
-        scrollview = ScrollView(do_scroll_x=False, do_scroll_y=True, pos_hint={'center_x': 0.68, 'center_y': 0.4})
+        scrollview = ScrollView(size_hint=(None, None), size=(1000, 800),do_scroll_x=False, do_scroll_y=True, pos_hint={'center_x': 0.68, 'center_y': 0.478})
+
 
         car_list_layout = GridLayout(cols=1, size_hint_x=0.8, size_hint_y=None, padding=10, spacing=10)
         car_list_layout.bind(minimum_height=car_list_layout.setter('height'))
@@ -54,7 +55,7 @@ class UserScreen(Screen):
             car_info = (
                 f"{car.color} {car.brand} {car.model} \n"
                 f"Body: {car.body}, Gearbox: {car.gearbox}, Places: {car.places}\n"
-                f"Price per Day: PLN{car.price_per_day}"
+                f"Price per Day: ${car.price_per_day}"
             )
             car_button = Button(
                 text=car_info,

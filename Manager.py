@@ -41,14 +41,14 @@ class ManagerScreen(Screen):
             layout.add_widget(text_input)
             self.text_inputs[title] = text_input
 
-        scroll_view = ScrollView(size_hint=(0.8, None), size=(600, 500), pos_hint={'center_x': 0.47})
+        scroll_view = ScrollView(size_hint=(None, None), size=(600, 500),pos_hint={'center_x': 0.58})
         scroll_view.add_widget(layout)
 
-        screen_layout = BoxLayout(orientation='vertical', spacing=10)
+        screen_layout = BoxLayout(orientation='vertical', spacing=10,pos_hint={'center_x': 0.51,'center_y': 0.6})
         screen_layout.add_widget(scroll_view)
 
         button_layout = BoxLayout(size_hint=(None, None), height=component_height, spacing=10,
-                                  pos_hint={'center_x': 0.3})
+                                  pos_hint={'center_x': 0.33})
 
         back_button = CustomButton(text='Back')
         add_button = CustomButton(text='Add')
