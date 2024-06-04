@@ -1,17 +1,21 @@
+import kivy
+from kivy.config import Config
+kivy.config.Config.set('graphics', 'resizable', '0')
+kivy.config.Config.set('kivy', 'window_icon', 'images/car.jpg')
 from kivy.app import App
 from kivy.uix.screenmanager import ScreenManager
-
 from Manager import ManagerScreen
 from Login_Screen import *
 from User_Screen import UserScreen
-from kivy.config import Config
 from Car_details import CarDetails
 from Reservation_Screen import ReservationScreen
 
 
+
+
+
 class Car_rental(App):
     def build(self):
-        Config.set('kivy', 'window_icon', 'car.png')
         Window.clearcolor = (44 / 255, 57 / 255, 75 / 255, 1)
         self.screen_manager = ScreenManager()
         main_screen = MainScreen(name='main')
