@@ -6,12 +6,13 @@ from Login_Screen import *
 from User_Screen import UserScreen
 from kivy.config import Config
 from Car_details import CarDetails
+from Reservation_Screen import ReservationScreen
 
 
 class Car_rental(App):
     def build(self):
         Config.set('kivy', 'window_icon', 'car.png')
-        Window.clearcolor = (49 / 255, 54 / 255, 63 / 255, 1)
+        Window.clearcolor = (44 / 255, 57 / 255, 75 / 255, 1)
         self.screen_manager = ScreenManager()
         main_screen = MainScreen(name='main')
         self.screen_manager.add_widget(main_screen)
@@ -27,6 +28,9 @@ class Car_rental(App):
         self.screen_manager.add_widget(user_screen)
         car_screen = CarDetails(name='car')
         self.screen_manager.add_widget(car_screen)
+        reservation_screen = ReservationScreen(name='reservation')
+        self.screen_manager.add_widget(reservation_screen)
+
         return self.screen_manager
 
 if __name__ == '__main__':

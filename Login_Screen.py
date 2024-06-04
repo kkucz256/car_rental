@@ -1,16 +1,22 @@
 import requests
 from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.button import Button
-from kivy.uix.label import Label
 from kivy.uix.screenmanager import ScreenManager, Screen
-from kivy.uix.textinput import TextInput
 from kivy.uix.popup import Popup
+from kivy.uix.label import Label
 from kivy.uix.scrollview import ScrollView
 from kivy.uix.gridlayout import GridLayout
 from Manager import ManagerScreen
 from kivy.core.window import Window
+from kivy.uix.image import Image
 import hashlib
+import sys
 
+
+#Tutaj dawaj importy z tej ścieżki
+sys.path.append('customclasses')
+from Custom_button import CustomButton
+from Custom_label import CustomLabel
+from Custom_input import CustomTextInput
 
 def sha256_hash(data):
     hasher = hashlib.sha256()
@@ -21,18 +27,18 @@ def sha256_hash(data):
 class MainScreen(Screen):
     def __init__(self, **kwargs):
         super(MainScreen, self).__init__(**kwargs)
-        self.button_color = (34 / 255, 40 / 255, 49 / 255, 1)
-        label = Label(text='Welcome', size_hint=(None, None), size=(200, 50))
-        login_button = Button(text='Log-in as user', background_color=self.button_color, size_hint=(None, None),
-                              size=(200, 50))
-        login_staff_button = Button(text='Log-in as staff', background_color=self.button_color, size_hint=(None, None),
-                                    size=(200, 50))
-        register_button = Button(text='Register', background_color=self.button_color, size_hint=(None, None),
-                                 size=(200, 50))
+        self.img = Image(source="images/logo.png")
+        self.img.size = (300, 300)
+        self.img.size_hint = (None, None)
+        self.img.pos_hint = {'center_x': 0.5, 'center_y': 0.5}
+
+        login_button = CustomButton(text='Log-in as user')
+        login_staff_button = CustomButton(text='Log-in as staff')
+        register_button = CustomButton(text='Register')
 
         layout = BoxLayout(orientation='vertical', spacing=10, size_hint=(None, None), size=(200, 200),
-                           pos_hint={'center_x': 0.5, 'center_y': 0.5})
-        layout.add_widget(label)
+                           pos_hint={'center_x': 0.5, 'center_y': 0.4})
+        layout.add_widget(self.img)
         layout.add_widget(login_button)
         layout.add_widget(login_staff_button)
         layout.add_widget(register_button)
@@ -55,28 +61,33 @@ class MainScreen(Screen):
 
 class LoginScreen(Screen):
     def __init__(self, info, **kwargs):
-        self.button_color = (34 / 255, 40 / 255, 49 / 255, 1)
         super(LoginScreen, self).__init__(**kwargs)
         self.orientation = 'vertical'
+        self.img = Image(source="images/logo.png")
+        self.img.size = (300, 300)
+        self.img.size_hint = (None, None)
+        self.img.pos_hint = {'center_x': 0.5, 'center_y': 0.85}
 
-        info_label = Label(text='', size_hint=(None, None), size=(200, 50))
+        info_label = CustomLabel(text='')
 
         if info == 'staff':
-            info2_label = Label(text='You are trying to login as staff', size_hint=(None, None), size=(200, 50))
+            info2_label = CustomLabel(text='You are trying to login as staff')
         else:
-            info2_label = Label(text='You are trying to login as user', size_hint=(None, None), size=(200, 50))
+            info2_label = CustomLabel(text='You are trying to login as user')
 
-        username = Label(text='E-mail:', size_hint=(None, None), size=(200, 50))
+        username = CustomLabel(text='E-mail:')
 
-        self.username_text = TextInput(multiline=False, size_hint=(None, None), width=200, height=30)
-        password = Label(text='Password:', size_hint=(None, None), size=(200, 50))
-        self.password_text = TextInput(multiline=False, size_hint=(None, None), width=200, height=30, password=True)
+        self.username_text = CustomTextInput()
+        password = CustomLabel(text='Password:')
+        self.password_text = CustomTextInput(password=True)
 
-        back_button = Button(text='Back',background_color=self.button_color, size_hint=(None, None), size=(200, 50))
-        login_button = Button(text='Login',background_color=self.button_color, size_hint=(None, None), size=(200, 50))
+        back_button = CustomButton(text='Back')
+        login_button = CustomButton(text='Login')
+
         layout = BoxLayout(orientation='vertical', spacing=10, size_hint=(None, None), size=(200, 200),
-                           pos_hint={'center_x': 0.5, 'center_y': 0.4})
+                           pos_hint={'center_x': 0.5, 'center_y': 0.3})
 
+        self.add_widget(self.img)
         layout.add_widget(info_label)
         layout.add_widget(info2_label)
         layout.add_widget(username)
@@ -125,6 +136,8 @@ class LoginScreen(Screen):
             response_json = response.json()
             message = list(response_json.keys())[0]
             if response.status_code == 200:
+                user_id = response_json.get('user_id')
+                self.manager.get_screen('user').set_user_id(user_id)
                 self.manager.current = 'user'
             elif response.status_code == 400:
                 self.show_popup('Error', message)
@@ -141,13 +154,15 @@ class LoginScreen(Screen):
         self.manager.current = 'main'
 
 
+
 class RegisterScreen(Screen):
     def __init__(self, **kwargs):
         super(RegisterScreen, self).__init__(**kwargs)
-        component_width = 200
         component_height = 50
-        input_height = 30
-        self.button_color = (34 / 255, 40 / 255, 49 / 255, 1)
+        self.img = Image(source="images/logo.png")
+        self.img.size = (300, 300)
+        self.img.size_hint = (None, None)
+        self.img.pos_hint = {'center_x': 0.13, 'center_y': 0.5}
 
         self.labels = ['E-mail:', 'Phone number:', 'Date of birth (YYYY/MM/DD):', 'First name:', 'Last name:', 'City:',
                        'Country:',
@@ -157,15 +172,15 @@ class RegisterScreen(Screen):
         layout.bind(minimum_height=layout.setter('height'))
 
         for label_text in self.labels:
-            layout.add_widget(Label(text=label_text, size_hint_y=None, height=component_height))
+            layout.add_widget(CustomLabel(text=label_text))
             if label_text == 'Password:' or label_text == 'Repeat Password:':
-                text_input = TextInput(multiline=False, size_hint_y=None, height=input_height, password=True)
+                text_input = CustomTextInput(password=True)
             else:
-                text_input = TextInput(multiline=False, size_hint_y=None, height=input_height)
+                text_input = CustomTextInput()
             layout.add_widget(text_input)
             self.text_inputs[label_text] = text_input
 
-        scroll_view = ScrollView(size_hint=(0.8, None), size=(600, 500), pos_hint={'center_x': 0.47})
+        scroll_view = ScrollView(size_hint=(0.6, None), size=(600, 500), pos_hint={'center_x': 0.55})
         scroll_view.add_widget(layout)
 
         screen_layout = BoxLayout(orientation='vertical', spacing=10)
@@ -173,12 +188,14 @@ class RegisterScreen(Screen):
 
         button_layout = BoxLayout(size_hint=(None, None), height=component_height, spacing=10,
                                   pos_hint={'center_x': 0.3})
-        back_button = Button(text='Back', size_hint=(None, None),background_color=self.button_color, size=(component_width, component_height))
-        register_button = Button(text='Register', size_hint=(None, None),background_color=self.button_color, size=(component_width, component_height))
+
+        back_button = CustomButton(text='Back')
+        register_button = CustomButton(text='Register')
         button_layout.add_widget(back_button)
         button_layout.add_widget(register_button)
 
         screen_layout.add_widget(button_layout)
+        self.add_widget(self.img)
         self.add_widget(screen_layout)
 
         back_button.bind(on_press=self.switch_to_main_screen)

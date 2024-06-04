@@ -4,11 +4,17 @@ from kivy.app import App
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.label import Label
 from kivy.uix.screenmanager import Screen
-from kivy.uix.textinput import TextInput
-from kivy.uix.button import Button
 from kivy.uix.scrollview import ScrollView
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.popup import Popup
+from kivy.uix.image import Image
+import sys
+
+#Tutaj dawaj importy z tej ścieżki
+sys.path.append('customclasses')
+from Custom_button import CustomButton
+from Custom_label import CustomLabel
+from Custom_input import CustomTextInput
 
 last_rental_beginning = datetime(2024, 4, 19)
 last_rental_end = datetime(2024, 4, 21)
@@ -20,12 +26,9 @@ class ManagerScreen(Screen):
     def __init__(self, **kwargs):
         super(ManagerScreen, self).__init__(**kwargs)
 
-        self.button_color = (34 / 255, 40 / 255, 49 / 255, 1)
         layout = GridLayout(cols=2, spacing=10, size_hint_y=None)
         layout.bind(minimum_height=layout.setter('height'))
-        component_width = 200
         component_height = 50
-        input_height = 30
 
         self.titles = ['Brand name:', 'Model:', 'Price per day:', 'Year of production:', 'Horsepower:', 'Engine type:',
                        'Body:',
@@ -33,8 +36,8 @@ class ManagerScreen(Screen):
         self.text_inputs = {}
 
         for title in self.titles:
-            layout.add_widget(Label(text=title, size_hint_y=None, height=component_height))
-            text_input = TextInput(multiline=False, size_hint_y=None, height=input_height)
+            layout.add_widget(CustomLabel(text=title))
+            text_input = CustomTextInput()
             layout.add_widget(text_input)
             self.text_inputs[title] = text_input
 
@@ -46,10 +49,10 @@ class ManagerScreen(Screen):
 
         button_layout = BoxLayout(size_hint=(None, None), height=component_height, spacing=10,
                                   pos_hint={'center_x': 0.3})
-        back_button = Button(text='Back', size_hint=(None, None), background_color=self.button_color,
-                             size=(component_width, component_height))
-        add_button = Button(text='Add', size_hint=(None, None), background_color=self.button_color,
-                            size=(component_width, component_height))
+
+        back_button = CustomButton(text='Back')
+        add_button = CustomButton(text='Add')
+
         button_layout.add_widget(back_button)
         button_layout.add_widget(add_button)
 

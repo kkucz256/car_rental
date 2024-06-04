@@ -90,12 +90,12 @@ def log_in():
     cur = conn.cursor()
     data = request.get_json()
 
-    cur.execute(f"""SELECT password FROM customer WHERE mail = '{data['email']}'""")
+    cur.execute("SELECT customer_id, password FROM customer WHERE mail = %s", (data['email'],))
     try:
-        db_password = cur.fetchone()[0]
-        print(db_password, data['password'])
-        if db_password == data['password']:
-            return jsonify({'success': True}), 200
+        user = cur.fetchone()
+        if user and user[1] == data['password']:
+            user_id = user[0]
+            return jsonify({'success': True, 'user_id': user_id}), 200
         else:
             return jsonify({'Wrong password': True}), 300
     except:
@@ -103,6 +103,7 @@ def log_in():
     finally:
         cur.close()
         conn.close()
+
 
 
 @app.route('/log-in_staff', methods=['GET'])
@@ -200,8 +201,8 @@ def provide_cars():
         return jsonify({"error": str(e)}), 500
 
 
-@app.route('/car-details/<int:carid>', methods=['GET'])
-def getcardetails(carid):
+@app.route('/car-details/<int:car_id>', methods=['GET'])
+def getcardetails(car_id):
     try:
         conn = connect_to_db()
         cur = conn.cursor()
@@ -224,6 +225,7 @@ def getcardetails(carid):
             return jsonify({"error": "Car not found"}), 404
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
 
 
 if __name__ == '__main__':

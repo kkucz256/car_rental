@@ -11,8 +11,15 @@ from kivy.core.window import Window
 from Car_for_list import Car_for_list
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.spinner import Spinner
-
+from kivy.uix.image import Image
 import hashlib
+import sys
+
+# Tutaj dawaj importy z tej ścieżki
+sys.path.append('customclasses')
+from Custom_button import CustomButton
+from Custom_label import CustomLabel
+from Custom_input import CustomTextInput
 
 
 class UserScreen(Screen):
@@ -24,22 +31,23 @@ class UserScreen(Screen):
         self.filter_body_input = None
         self.filter_brand_input = None
         self.cars = []
-        self.org=[]
+        self.org = []
+        self.user_id = None
         self.sort_value = 90
+        self.component_height = 50
 
         super(UserScreen, self).__init__(**kwargs)
 
-        self.button_color = (34 / 255, 40 / 255, 49 / 255, 1)
-
-        self.component_width = 200
-        self.component_height = 50
-
     def create_layout(self):
+        self.img = Image(source="images/logo.png")
+        self.img.size = (300, 300)
+        self.img.size_hint = (None, None)
+        self.img.pos_hint = {'center_x': 0.09, 'center_y': 0.9}
         self.clear_widgets()
 
-        scrollview = ScrollView(do_scroll_x=False, do_scroll_y=True)
+        scrollview = ScrollView(do_scroll_x=False, do_scroll_y=True, pos_hint={'center_x': 0.68, 'center_y': 0.4})
 
-        car_list_layout = GridLayout(cols=1, size_hint_y=None, padding=10, spacing=10)
+        car_list_layout = GridLayout(cols=1, size_hint_x=0.8, size_hint_y=None, padding=10, spacing=10)
         car_list_layout.bind(minimum_height=car_list_layout.setter('height'))
 
         for car in self.cars:
@@ -51,10 +59,10 @@ class UserScreen(Screen):
             car_button = Button(
                 text=car_info,
                 size_hint_y=None,
-                size_hint_x=0.6,
+                size_hint_x=0.5,
                 height=120,
                 background_normal='',
-                background_color=(0.5, 0.5, 0.5, 1),
+                background_color=(8 / 255, 32 / 255, 50 / 255, 1),
                 color=(1, 1, 1, 1),
                 halign='center',
                 valign='middle',
@@ -67,66 +75,50 @@ class UserScreen(Screen):
 
         scrollview.add_widget(car_list_layout)
 
-        back_button = Button(text='Back', size_hint=(None, None), background_color=self.button_color,
-                             size=(self.component_width, self.component_height))
-        sort_button = Button(text='Sort', size_hint=(None, None), background_color=self.button_color,
-                             size=(self.component_width, self.component_height))
+        back_button = CustomButton(text='Back')
+        sort_button = CustomButton(text='Sort')
 
-        button_layout = BoxLayout(size_hint=(None, None), height=self.component_height, spacing=10,
-                                  pos_hint={'center_x': 0.48})
-        sort_layout = BoxLayout(size_hint=(None, None), height=self.component_height, spacing=10,
-                                pos_hint={'center_x': 0.39})
+        sort_layout = BoxLayout(orientation='vertical', size_hint=(None, None), height=self.component_height,
+                                spacing=10,
+                                pos_hint={'center_x': 0.05, 'center_y': 0.2})
         spinner = Spinner(
             text='Pick sorting option',
-            values=('Sort by price per day descending', 'Sort by price per day ascending', 'Sort by brand alphabetic',
-                    'Sort by brand analphabetic'),
+            values=('Price per day descending', 'Price per day ascending', 'Brand alphabetically',
+                    'Brand analphabetically'),
             size_hint=(None, None),
-            size=(300, 44)
+            size=(200, 44),
+            background_color=(1, 76 / 255, 41 / 256, 1),
+
         )
+
         spinner.bind(text=self.on_spinner_text_changed)
         sort_layout.add_widget(spinner)
         sort_layout.add_widget(sort_button)
 
-        button_layout.add_widget(back_button)
-
-        self.filter_brand_input = TextInput(hint_text='Enter brand', multiline=False, size_hint=(None, None), width=200,
-                                            height=self.component_height)
-        self.filter_body_input = TextInput(hint_text='Enter body type', multiline=False, size_hint=(None, None),
-                                           width=200, height=self.component_height)
-        self.filter_seats_input = TextInput(hint_text='Enter number of seats', multiline=False, size_hint=(None, None),
-                                            width=200, height=self.component_height)
-        self.filter_price_input = TextInput(hint_text='Enter maximum price', multiline=False, size_hint=(None, None),
-                                            width=200, height=self.component_height)
+        self.filter_brand_input = CustomTextInput(hint_text='Enter brand')
+        self.filter_body_input = CustomTextInput(hint_text='Enter body type')
+        self.filter_seats_input = CustomTextInput(hint_text='Enter number of seats')
+        self.filter_price_input = CustomTextInput(hint_text='Enter maximum price')
 
         # Przycisk filtru
-        filter_button = Button(text='Filter', size_hint=(None, None), background_color=self.button_color,
-                               size=(self.component_width, self.component_height))
-        default_button = Button(text='Default list', size_hint=(None, None), background_color=self.button_color,
-                               size=(self.component_width, self.component_height))
+        filter_button = CustomButton(text='Filter')
+        default_button = CustomButton(text='Default list')
         filter_button.bind(on_press=self.filter_cars)
         default_button.bind(on_press=self.default)
 
         # Układ pól tekstowych
-        filter_layout = BoxLayout(size_hint=(None, None), height=self.component_height, spacing=10,
-                                  pos_hint={'center_x': 0.1})
-        filter_layout.add_widget(self.filter_brand_input)
-        filter_layout.add_widget(self.filter_body_input)
-        filter_layout.add_widget(self.filter_seats_input)
-        filter_layout.add_widget(self.filter_price_input)
-        filter_layout.add_widget(filter_button)
-        filter_layout.add_widget(default_button)
+        sort_layout.add_widget(self.filter_brand_input)
+        sort_layout.add_widget(self.filter_body_input)
+        sort_layout.add_widget(self.filter_seats_input)
+        sort_layout.add_widget(self.filter_price_input)
+        sort_layout.add_widget(filter_button)
+        sort_layout.add_widget(default_button)
 
-        main_layout = BoxLayout(orientation='vertical',
-                                padding=[100, 30, 100, 30], spacing=10)
+        sort_layout.add_widget(back_button)
 
-        main_layout.add_widget(filter_layout)
-
-        main_layout.add_widget(scrollview)
-
-        main_layout.add_widget(sort_layout)
-        main_layout.add_widget(button_layout)
-
-        self.add_widget(main_layout)
+        self.add_widget(self.img)
+        self.add_widget(sort_layout)
+        self.add_widget(scrollview)
 
         back_button.bind(on_press=self.go_back)
         sort_button.bind(on_press=self.sorting)
@@ -148,31 +140,34 @@ class UserScreen(Screen):
             self.cars.append(
                 Car_for_list(elem['id'], elem['brand'], elem['color'], elem['model'], elem['price_per_day'],
                              elem['body'], elem['gearbox'], elem['places']))
-        self.org=self.cars
+        self.org = self.cars
         self.create_layout()
 
     def go_back(self, instance):
         self.manager.current = 'login'
+
+    def set_user_id(self, user_id):
+        self.user_id = user_id
 
     def on_leave(self):
         Window.size = (800, 600)
 
     def car_details(self, car_id):
         self.manager.get_screen('car').set_car_id(car_id)
+        self.manager.get_screen('car').set_user_id(self.user_id)
         self.manager.current = 'car'
 
     def on_spinner_text_changed(self, spinner, text):
-        if text == 'Sort by price per day descending':
+        if text == 'Price per day descending':
             self.sort_value = 0
-        elif text == 'Sort by price per day ascending':
+        elif text == 'Price per day ascending':
             self.sort_value = 1
-        elif text == 'Sort by brand alphabetic':
+        elif text == 'Brand alphabetically':
             self.sort_value = 2
-        elif text == 'Sort by brand analphabetic':
+        elif text == 'Brand analphabetically':
             self.sort_value = 3
 
     def sorting(self, instance):
-
         if self.sort_value == 0:
             self.cars.sort(key=lambda car: car.price_per_day, reverse=True)
         elif self.sort_value == 1:
@@ -230,4 +225,3 @@ class UserScreen(Screen):
 
 def contains_substring(main_string, substring):
     return substring.lower() in main_string.lower()
-
