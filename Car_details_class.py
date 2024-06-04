@@ -1,3 +1,4 @@
+
 class Car_details_class:
     def __init__(self, id=None, brand=None, status=None, price_per_day=None, year_of_production=None, horsepower=None,
                  engine_type=None, body=None, color=None, max_velocity=None, gearbox=None, seats_no=None, deposit=None,

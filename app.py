@@ -200,8 +200,8 @@ def provide_cars():
         return jsonify({"error": str(e)}), 500
 
 
-@app.route('/car-details/<int:car_id>', methods=['GET'])
-def get_car_details(car_id):
+@app.route('/car-details/<int:carid>', methods=['GET'])
+def getcardetails(carid):
     try:
         conn = connect_to_db()
         cur = conn.cursor()
