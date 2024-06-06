@@ -11,7 +11,6 @@ import hashlib
 import sys
 
 
-#Tutaj dawaj importy z tej ścieżki
 sys.path.append('customclasses')
 from Custom_button import CustomButton
 from Custom_label import CustomLabel

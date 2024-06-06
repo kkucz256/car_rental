@@ -101,13 +101,11 @@ class UserScreen(Screen):
         self.filter_seats_input = CustomTextInput(hint_text='Enter number of seats')
         self.filter_price_input = CustomTextInput(hint_text='Enter maximum price')
 
-        # Przycisk filtru
         filter_button = CustomButton(text='Filter')
         default_button = CustomButton(text='Default list')
         filter_button.bind(on_press=self.filter_cars)
         default_button.bind(on_press=self.default)
 
-        # Układ pól tekstowych
         sort_layout.add_widget(self.filter_brand_input)
         sort_layout.add_widget(self.filter_body_input)
         sort_layout.add_widget(self.filter_seats_input)
@@ -180,43 +178,35 @@ class UserScreen(Screen):
         self.create_layout()
 
     def filter_cars(self, instance):
-        # Pobieramy wartości wprowadzone przez użytkownika z pól tekstowych
         filter_body = self.filter_body_input.text.strip()
         filter_brand = self.filter_brand_input.text.strip()
         filter_seats = self.filter_seats_input.text.strip()
         filter_price = self.filter_price_input.text.strip()
 
-        # Kopiujemy listę samochodów do przefiltrowania
         filtered = self.cars
 
-        # Filtrujemy po rodzaju nadwozia
         if filter_body:
             filtered = list(filter(lambda car: contains_substring(car.body, filter_body), filtered))
 
-        # Filtrujemy po marce
         if filter_brand:
             filtered = list(filter(lambda car: contains_substring(car.brand, filter_brand), filtered))
 
-        # Filtrujemy po liczbie miejsc
         if filter_seats:
             try:
                 seats = int(filter_seats)
                 filtered = list(filter(lambda car: car.places == seats, filtered))
             except ValueError:
-                pass  # Ignorujemy błędną wartość wprowadzoną przez użytkownika
+                pass
 
-        # Filtrujemy po maksymalnej cenie
         if filter_price:
             try:
                 price = float(filter_price)
                 filtered = list(filter(lambda car: car.price_per_day <= price, filtered))
             except ValueError:
-                pass  # Ignorujemy błędną wartość wprowadzoną przez użytkownika
+                pass
 
-        # Ustawiamy przefiltrowaną listę samochodów
         self.cars = filtered
 
-        # Odświeżamy widok
         self.create_layout()
 
     def default(self, instance):

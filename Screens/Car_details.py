@@ -11,7 +11,7 @@ from kivy.uix.image import Image
 from kivy.uix.image import AsyncImage
 import sys
 
-# Tutaj dawaj importy z tej ścieżki
+
 sys.path.append('customclasses')
 from Custom_button import CustomButton
 from Custom_label import CustomLabel
@@ -32,7 +32,6 @@ class CarDetails(Screen):
         self.add_widget(self.layout)
 
     def on_pre_enter(self):
-
 
         if self.car_id:
             url = f'http://127.0.0.1:5000/car-details/{self.car_id}'
@@ -76,11 +75,8 @@ class CarDetails(Screen):
         self.img = AsyncImage(source=self.car.photo)
         self.img.size = (500, 400)
         self.img.size_hint = (None, None)
-        # self.img.pos_hint = {'center_x': 0.09, 'center_y': 0.9}
         upper_left_layout.add_widget(self.img)
         self.add_widget(upper_left_layout)
-
-
 
         upper_right_layout = BoxLayout(orientation='vertical', pos_hint={'right': 1, 'top': 1})
         main_info_label = CustomLabel(
@@ -97,25 +93,17 @@ class CarDetails(Screen):
         )
         details_label_1 = CustomLabel(text='Details:', font_size=20, size_hint_y=None, height=50)
 
-        upper_right_layout.add_widget(main_info_label)
-        upper_right_layout.add_widget(status_label)
-        upper_right_layout.add_widget(price_deposit_label)
-        upper_right_layout.add_widget(details_label_1)
         for detail_key, detail_value in self.details_dict.items():
             upper_right_layout.add_widget(
                 CustomLabel(text=f"{detail_key}: {detail_value}", size_hint_y=None, height=30, halign='center'))
-        self.layout.add_widget(upper_right_layout)
 
         buttons_layout = GridLayout(cols=2, size_hint_y=None, spacing=10, height=50,
                                     pos_hint={'center_x': 0.75, 'center_y': 0.05})
         buttons_layout.add_widget(CustomButton(text='Back', on_press=self.go_back))
         self.buy_button = CustomButton(text='Buy')
 
-        buttons_layout.add_widget(self.buy_button)
-        self.add_widget(buttons_layout)
-
         bottom_left_layout = BoxLayout(orientation='vertical', spacing=10, size_hint=(.5, .3),
-                                            pos_hint={'center_y': 0.3})
+                                       pos_hint={'center_y': 0.3})
         self.s = Slider(orientation='horizontal', min=1, max=30, value=7, step=1, value_track=True)
         self.s.bind(value=self.update_price_label)
         self.days = self.s.value
@@ -123,13 +111,22 @@ class CarDetails(Screen):
         self.days_label = CustomLabel(text=f"Choose the amount of days: {self.days}", font_size=15,
                                       pos_hint={'center_x': 0.5})
         self.price_label = CustomLabel(text=f"Price: {self.price}", font_size=15, pos_hint={'center_x': 0.5})
+
+        upper_right_layout.add_widget(main_info_label)
+        upper_right_layout.add_widget(status_label)
+        upper_right_layout.add_widget(price_deposit_label)
+        upper_right_layout.add_widget(details_label_1)
+        self.layout.add_widget(upper_right_layout)
+
+        buttons_layout.add_widget(self.buy_button)
+        self.add_widget(buttons_layout)
+
         bottom_left_layout.clear_widgets()
         bottom_left_layout.add_widget(self.days_label)
         bottom_left_layout.add_widget(self.s)
         bottom_left_layout.add_widget(self.price_label)
 
         self.add_widget(bottom_left_layout)
-
 
         self.buy_button.bind(
             on_press=lambda btn: self.reservation(self.car_id, self.price, self.days))

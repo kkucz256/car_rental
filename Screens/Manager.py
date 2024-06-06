@@ -10,7 +10,7 @@ from kivy.uix.popup import Popup
 from kivy.uix.image import Image
 import sys
 
-#Tutaj dawaj importy z tej ścieżki
+
 sys.path.append('customclasses')
 from Custom_button import CustomButton
 from Custom_label import CustomLabel
