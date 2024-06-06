@@ -6,7 +6,6 @@ from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.uix.textinput import TextInput
 from kivy.uix.popup import Popup
 from kivy.uix.scrollview import ScrollView
-from Manager import ManagerScreen
 from kivy.core.window import Window
 from Car_for_list import Car_for_list
 from kivy.uix.gridlayout import GridLayout

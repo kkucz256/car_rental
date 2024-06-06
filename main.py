@@ -2,8 +2,12 @@ import kivy
 from kivy.config import Config
 kivy.config.Config.set('graphics', 'resizable', '0')
 kivy.config.Config.set('kivy', 'window_icon', 'images/car.jpg')
+
 from kivy.app import App
 from kivy.uix.screenmanager import ScreenManager
+import sys
+
+sys.path.append('Screens')
 from Manager import ManagerScreen
 from Login_Screen import *
 from User_Screen import UserScreen

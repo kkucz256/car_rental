@@ -5,7 +5,6 @@ from kivy.uix.popup import Popup
 from kivy.uix.label import Label
 from kivy.uix.scrollview import ScrollView
 from kivy.uix.gridlayout import GridLayout
-from Manager import ManagerScreen
 from kivy.core.window import Window
 from kivy.uix.image import Image
 import hashlib
