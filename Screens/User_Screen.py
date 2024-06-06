@@ -35,6 +35,7 @@ class UserScreen(Screen):
         self.user_id = None
         self.sort_value = 90
         self.component_height = 50
+        self.staff_access = False
 
         super(UserScreen, self).__init__(**kwargs)
 
@@ -78,10 +79,12 @@ class UserScreen(Screen):
 
         back_button = CustomButton(text='Back')
         sort_button = CustomButton(text='Sort')
-
+        y_center = 0.2
+        if self.staff_access:
+            y_center = 0.1
         sort_layout = BoxLayout(orientation='vertical', size_hint=(None, None), height=self.component_height,
                                 spacing=10,
-                                pos_hint={'center_x': 0.05, 'center_y': 0.2})
+                                pos_hint={'center_x': 0.05, 'center_y': y_center})
         spinner = Spinner(
             text='Pick sorting option',
             values=('Price per day descending', 'Price per day ascending', 'Brand alphabetically',
@@ -93,8 +96,7 @@ class UserScreen(Screen):
         )
 
         spinner.bind(text=self.on_spinner_text_changed)
-        sort_layout.add_widget(spinner)
-        sort_layout.add_widget(sort_button)
+
 
         self.filter_brand_input = CustomTextInput(hint_text='Enter brand')
         self.filter_body_input = CustomTextInput(hint_text='Enter body type')
@@ -103,15 +105,23 @@ class UserScreen(Screen):
 
         filter_button = CustomButton(text='Filter')
         default_button = CustomButton(text='Default list')
+        if self.staff_access:
+            add_button = CustomButton(text='Add')
+            add_button.bind(on_press=self.car_adding)
+
         filter_button.bind(on_press=self.filter_cars)
         default_button.bind(on_press=self.default)
 
+        sort_layout.add_widget(spinner)
+        sort_layout.add_widget(sort_button)
         sort_layout.add_widget(self.filter_brand_input)
         sort_layout.add_widget(self.filter_body_input)
         sort_layout.add_widget(self.filter_seats_input)
         sort_layout.add_widget(self.filter_price_input)
         sort_layout.add_widget(filter_button)
         sort_layout.add_widget(default_button)
+        if self.staff_access:
+            sort_layout.add_widget(add_button)
 
         sort_layout.add_widget(back_button)
 
@@ -125,6 +135,7 @@ class UserScreen(Screen):
     def show_popup(self, title, message):
         popup = Popup(title=title, content=Label(text=message), size_hint=(None, None), size=(400, 200))
         popup.open()
+
 
     def on_pre_enter(self):
         Window.size = (1280, 720)
@@ -142,18 +153,28 @@ class UserScreen(Screen):
         self.org = self.cars
         self.create_layout()
 
+    def car_adding(self, instance):
+        self.manager.current = 'add'
     def go_back(self, instance):
-        self.manager.current = 'login'
+        if self.staff_access:
+            self.manager.current = 'staff'
+        else:
+            self.manager.current = 'login'
 
     def set_user_id(self, user_id):
         self.user_id = user_id
+
+    def set_staff_access(self, staff_access):
+        self.staff_access = staff_access
 
     def on_leave(self):
         Window.size = (800, 600)
 
     def car_details(self, car_id):
-        self.manager.get_screen('car').set_car_id(car_id)
-        self.manager.get_screen('car').set_user_id(self.user_id)
+        car_screen = self.manager.get_screen('car')
+        car_screen.set_car_id(car_id)
+        car_screen.set_user_id(self.user_id)
+        car_screen.set_staff_access(self.staff_access)
         self.manager.current = 'car'
 
     def on_spinner_text_changed(self, spinner, text):

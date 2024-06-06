@@ -41,10 +41,10 @@ class ManagerScreen(Screen):
             layout.add_widget(text_input)
             self.text_inputs[title] = text_input
 
-        scroll_view = ScrollView(size_hint=(None, None), size=(600, 500),pos_hint={'center_x': 0.58})
+        scroll_view = ScrollView(size_hint=(None, None), size=(500, 500),pos_hint={'center_x': 0.58})
         scroll_view.add_widget(layout)
 
-        screen_layout = BoxLayout(orientation='vertical', spacing=10,pos_hint={'center_x': 0.51,'center_y': 0.6})
+        screen_layout = BoxLayout(orientation='vertical', spacing=10,pos_hint={'center_x': 0.51,'center_y': 0.52})
         screen_layout.add_widget(scroll_view)
 
         button_layout = BoxLayout(size_hint=(None, None), height=component_height, spacing=10,
@@ -99,7 +99,9 @@ class ManagerScreen(Screen):
             self.show_popup('Error', 'Fill all the fields')
 
     def go_back(self, instance):
-        self.manager.current = 'staff'
+        self.manager.get_screen('user').set_staff_access(True)
+        self.manager.current = 'user'
+
 
     def show_popup(self, title, message):
         popup = Popup(title=title, content=Label(text=message), size_hint=(None, None), size=(400, 200))

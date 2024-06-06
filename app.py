@@ -226,7 +226,41 @@ def getcardetails(car_id):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+@app.route('/user-details/<int:user_id>', methods=['GET'])
+def get_user_details(user_id):
+    try:
+        conn = connect_to_db()
+        cur = conn.cursor()
+        cur.execute("SELECT first_name, last_name FROM customer WHERE customer_id = %s", (user_id,))
+        user = cur.fetchone()
+        conn.close()
+        if user:
+            return jsonify({'first_name': user[0], 'last_name': user[1]}), 200
+        else:
+            return jsonify({'error': 'User not found'}), 404
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
+@app.route('/car-details/<int:car_id>', methods=['GET'])
+def get_car_details(car_id):
+    try:
+        conn = connect_to_db()
+        cur = conn.cursor()
+        cur.execute("""
+            SELECT brand.brand, car.model, color.color
+            FROM car 
+            JOIN brand ON car.brand_id = brand.brand_id 
+            JOIN color ON car.color_id = color.color_id
+            WHERE car.car_id = %s
+        """, (car_id,))
+        car = cur.fetchone()
+        conn.close()
+        if car:
+            return jsonify({'brand': car[0], 'model': car[1], 'color': car[2]}), 200
+        else:
+            return jsonify({'error': 'Car not found'}), 404
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
     app.run(debug=True)

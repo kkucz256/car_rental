@@ -115,13 +115,15 @@ class LoginScreen(Screen):
             response_json = response.json()
             message = list(response_json.keys())[0]
             if response.status_code == 200:
-                self.manager.current = 'manager'
+                self.manager.get_screen('user').set_staff_access(True)
+                self.manager.current = 'user'
             elif response.status_code == 400:
                 self.show_popup('Error', message)
             elif response.status_code == 300:
                 self.show_popup('Error', message)
         else:
             self.show_popup('Error', 'Provide credentials')
+        self.clear_text_fields()
 
     def user_access(self, instance):
         login_credentials = {
@@ -135,6 +137,7 @@ class LoginScreen(Screen):
             message = list(response_json.keys())[0]
             if response.status_code == 200:
                 user_id = response_json.get('user_id')
+                self.manager.get_screen('user').set_staff_access(False)
                 self.manager.get_screen('user').set_user_id(user_id)
                 self.manager.current = 'user'
             elif response.status_code == 400:
@@ -143,6 +146,7 @@ class LoginScreen(Screen):
                 self.show_popup('Error', message)
         else:
             self.show_popup('Error', 'Provide credentials')
+        self.clear_text_fields()
 
     def show_popup(self, title, message):
         popup = Popup(title=title, content=Label(text=message), size_hint=(None, None), size=(400, 200))
@@ -150,6 +154,10 @@ class LoginScreen(Screen):
 
     def switch_to_main_screen(self, instance):
         self.manager.current = 'main'
+
+    def clear_text_fields(self):
+        self.username_text.text = ''
+        self.password_text.text = ''
 
 
 

@@ -27,6 +27,7 @@ class CarDetails(Screen):
         self.details_dict = {}
         self.price = 0
         self.days = 0
+        self.staff_access = False
 
         self.layout = BoxLayout(orientation='vertical', size_hint=(1, 1), pos_hint={'center_x': 1.1, 'center_y': 0.72})
         self.add_widget(self.layout)
@@ -97,10 +98,21 @@ class CarDetails(Screen):
             upper_right_layout.add_widget(
                 CustomLabel(text=f"{detail_key}: {detail_value}", size_hint_y=None, height=30, halign='center'))
 
+        x_center = 0
+        if not self.staff_access:
+            self.buy_button = CustomButton(text='Buy')
+            self.buy_button.bind(
+                on_press=lambda btn: self.reservation(self.car_id, self.price, self.days))
+            x_center = 0.75
+        else:
+            x_center = 0.85
+
         buttons_layout = GridLayout(cols=2, size_hint_y=None, spacing=10, height=50,
-                                    pos_hint={'center_x': 0.75, 'center_y': 0.05})
+                                    pos_hint={'center_x': x_center, 'center_y': 0.05})
         buttons_layout.add_widget(CustomButton(text='Back', on_press=self.go_back))
-        self.buy_button = CustomButton(text='Buy')
+
+
+
 
         bottom_left_layout = BoxLayout(orientation='vertical', spacing=10, size_hint=(.5, .3),
                                        pos_hint={'center_y': 0.3})
@@ -117,8 +129,8 @@ class CarDetails(Screen):
         upper_right_layout.add_widget(price_deposit_label)
         upper_right_layout.add_widget(details_label_1)
         self.layout.add_widget(upper_right_layout)
-
-        buttons_layout.add_widget(self.buy_button)
+        if not self.staff_access:
+            buttons_layout.add_widget(self.buy_button)
         self.add_widget(buttons_layout)
 
         bottom_left_layout.clear_widgets()
@@ -128,14 +140,17 @@ class CarDetails(Screen):
 
         self.add_widget(bottom_left_layout)
 
-        self.buy_button.bind(
-            on_press=lambda btn: self.reservation(self.car_id, self.price, self.days))
+
 
     def update_price_label(self, instance, value):
         self.days = self.s.value
         self.price = self.s.value * self.car.price_per_day
         self.days_label.text = f"Choose the amount of days: {self.days}"
         self.price_label.text = f"Price: {self.price}"
+
+    def set_staff_access(self, access):
+        self.staff_access = access
+
 
     def go_back(self, instance):
         self.manager.current = 'user'

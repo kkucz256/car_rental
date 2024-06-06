@@ -30,7 +30,7 @@ class Car_rental(App):
         self.screen_manager.add_widget(login_screen_staff)
         register_screen = RegisterScreen(name='register')
         self.screen_manager.add_widget(register_screen)
-        manager_screen = ManagerScreen(name='manager')
+        manager_screen = ManagerScreen(name='add')
         self.screen_manager.add_widget(manager_screen)
         user_screen = UserScreen(name='user')
         self.screen_manager.add_widget(user_screen)
