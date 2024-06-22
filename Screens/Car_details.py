@@ -87,12 +87,28 @@ class CarDetails(Screen):
             height=150,
             valign='bottom'
         )
-        status_label = CustomLabel(text=self.status_text())
+        booking_lbl =CustomLabel(text="Current bookings:")
+        string_text="empty"
+        bookings = self.fetch_bookings(self.car_id)
+        if bookings:
+            bookings_info = "\n".join([f"From: {booking['rental_beginning']} to {booking['rental_end']}" for booking in bookings])
+            string_text = f"\n{bookings_info}"
+        else:
+            string_text = "No bookings for the car yet."
+        status_label = CustomLabel(text=string_text)
+
+
         price_deposit_label = CustomLabel(
             text=f"Price per Day: ${self.car.price_per_day} Deposit: ${self.car.deposit}",
             height=100
         )
-        details_label_1 = CustomLabel(text='Details:', font_size=20, size_hint_y=None, height=50)
+        upper_right_layout.add_widget(main_info_label)
+        upper_right_layout.add_widget(booking_lbl)
+        upper_right_layout.add_widget(status_label)
+        upper_right_layout.add_widget(price_deposit_label)
+
+
+
 
         for detail_key, detail_value in self.details_dict.items():
             upper_right_layout.add_widget(
@@ -112,7 +128,10 @@ class CarDetails(Screen):
         buttons_layout.add_widget(CustomButton(text='Back', on_press=self.go_back))
 
 
-
+        self.layout.add_widget(upper_right_layout)
+        if not self.staff_access:
+            buttons_layout.add_widget(self.buy_button)
+        self.add_widget(buttons_layout)
 
         bottom_left_layout = BoxLayout(orientation='vertical', spacing=10, size_hint=(.5, .3),
                                        pos_hint={'center_y': 0.3})
@@ -124,23 +143,12 @@ class CarDetails(Screen):
                                       pos_hint={'center_x': 0.5})
         self.price_label = CustomLabel(text=f"Price: {self.price}", font_size=15, pos_hint={'center_x': 0.5})
 
-        upper_right_layout.add_widget(main_info_label)
-        upper_right_layout.add_widget(status_label)
-        upper_right_layout.add_widget(price_deposit_label)
-        upper_right_layout.add_widget(details_label_1)
-        self.layout.add_widget(upper_right_layout)
-        if not self.staff_access:
-            buttons_layout.add_widget(self.buy_button)
-        self.add_widget(buttons_layout)
-
         bottom_left_layout.clear_widgets()
         bottom_left_layout.add_widget(self.days_label)
         bottom_left_layout.add_widget(self.s)
         bottom_left_layout.add_widget(self.price_label)
 
         self.add_widget(bottom_left_layout)
-
-
 
     def update_price_label(self, instance, value):
         self.days = self.s.value
@@ -158,7 +166,7 @@ class CarDetails(Screen):
     def reservation(self, car_id, price, days):
         self.update_price_label(None, self.s.value)
         self.manager.get_screen('reservation').set_car_id(car_id)
-        self.manager.get_screen('reservation').set_price(price)
+        self.manager.get_screen('reservation').set_price(price + self.car.deposit)
         self.manager.get_screen('reservation').set_days(days)
         self.manager.get_screen('reservation').set_user_id(self.user_id)
         self.manager.current = 'reservation'
@@ -168,3 +176,30 @@ class CarDetails(Screen):
             return "The car is currently available"
         if self.car.status == 'booked':
             return f"The car is currently taken, it will be available on: {self.car.last_rental_end}"
+
+    def fetch_bookings(self, car_id):
+        import requests
+        import datetime
+
+        try:
+            response = requests.get(f'http://127.0.0.1:5000/get-bookings/{car_id}')
+            response.raise_for_status()
+            bookings = response.json()
+
+            cleaned_bookings = []
+            for booking in bookings:
+                rental_beginning = booking['rental_beginning'][:16]
+                rental_end = booking['rental_end'][:16]
+
+                cleaned_booking = {
+                    'rental_beginning': rental_beginning,
+                    'rental_end': rental_end
+                }
+                cleaned_bookings.append(cleaned_booking)
+
+            return cleaned_bookings
+
+        except requests.exceptions.RequestException as e:
+            print(f"Error fetching bookings: {str(e)}")
+            return []
+

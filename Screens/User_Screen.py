@@ -109,6 +109,7 @@ class UserScreen(Screen):
             add_button = CustomButton(text='Add')
             add_button.bind(on_press=self.car_adding)
 
+
         filter_button.bind(on_press=self.filter_cars)
         default_button.bind(on_press=self.default)
 

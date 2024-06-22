@@ -1,30 +1,7 @@
 from flask import Flask, jsonify, request
 import psycopg2
 from Car_details_class import Car_details_class
-
-app = Flask(__name__)
-db_params = {
-    'dbname': 'defaultdb',
-    'user': 'avnadmin',
-    'password': 'AVNS_QxzPpkrNJXOolRyltc4',
-    'host': 'car-rental-car-rreennttaall.e.aivencloud.com',
-    'port': '22365'
-}
-
-
-def connect_to_db():
-    conn = psycopg2.connect(**db_params)
-    return conn
-
-
-@app.route('/')
-def index():
-    return 'Witaj w API wypożyczalni!'
-
-
-from flask import Flask, jsonify, request
 from Car_for_list import Car_for_list
-import psycopg2
 
 app = Flask(__name__)
 db_params = {
@@ -34,7 +11,6 @@ db_params = {
     'host': 'car-rental-car-rreennttaall.e.aivencloud.com',
     'port': '22365'
 }
-
 
 def connect_to_db():
     conn = psycopg2.connect(**db_params)
@@ -261,6 +237,116 @@ def get_car_details(car_id):
             return jsonify({'error': 'Car not found'}), 404
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+@app.route('/get-bookings/<int:car_id>', methods=['GET'])
+def get_bookings(car_id):
+    try:
+        conn = connect_to_db()
+        cur = conn.cursor()
+        cur.execute("""
+            SELECT rental_beginning, rental_end
+            FROM booking
+            WHERE car_id = %s
+        """, (car_id,))
+        rows = cur.fetchall()
+        conn.close()
+
+        bookings = []
+        for row in rows:
+            booking = {
+                'rental_beginning': row[0],
+                'rental_end': row[1]
+            }
+            bookings.append(booking)
+
+        return jsonify(bookings), 200
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/get-enum-values/payment_type', methods=['GET'])
+def get_payment_types():
+    try:
+        conn = connect_to_db()
+        cur = conn.cursor()
+
+        cur.execute("SELECT unnest(enum_range(NULL::payment_type))")
+        payment_types = [row[0] for row in cur.fetchall()]
+
+        conn.close()
+        return jsonify({'values': payment_types}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/create-booking', methods=['POST'])
+def create_booking():
+    data = request.json
+    try:
+        customer_id = data['customer_id']
+        car_id = data['car_id']
+        rental_days = data['rental_days']
+        rental_beginning = data['rental_beginning']
+        rental_end = data['rental_end']
+        payment_type = data['payment_type'].lower()
+        payment_amount = data['payment_amount']
+
+        conn = connect_to_db()
+        cur = conn.cursor()
+
+        cur.execute("""
+                   SELECT rental_beginning, rental_end
+                   FROM booking
+                   WHERE car_id = %s
+                     AND ((rental_beginning <= %s AND rental_end > %s)
+                          OR (rental_beginning < %s AND rental_end >= %s)
+                          OR (rental_beginning >= %s AND rental_end <= %s))
+               """, (car_id, rental_beginning, rental_beginning, rental_end, rental_end, rental_beginning, rental_end))
+
+        existing_reservation = cur.fetchone()
+
+        if existing_reservation:
+            conn.rollback()
+            cur.close()
+            conn.close()
+            return jsonify({
+                'start_date': existing_reservation[0],
+                'end_date': existing_reservation[1]
+            }), 201
+
+
+        cur.execute("""
+                  INSERT INTO payment (customer_id, type, amount, payment_date)
+                  VALUES (%s, %s, %s, NOW())
+                  RETURNING payment_id
+              """, (customer_id, payment_type, payment_amount))
+        payment_id = cur.fetchone()[0]
+
+        print(f"Payment ID: {payment_id}")
+
+
+        cur.execute("""
+                  INSERT INTO booking (customer_id, car_id, payment_id, rental_days, rental_beginning, rental_end)
+                  VALUES (%s, %s, %s, %s, %s, %s)
+                  RETURNING booking_id
+              """, (customer_id, car_id, payment_id, rental_days, rental_beginning, rental_end))
+        booking_id = cur.fetchone()[0]
+
+        print(f"Booking ID: {booking_id}")
+
+        cur.execute("""
+                   UPDATE car
+                   SET last_rental_beginning = %s, last_rental_end = %s
+                   WHERE car_id = %s
+               """, (rental_beginning, rental_end, car_id))
+
+        conn.commit()
+        cur.close()
+        conn.close()
+        return jsonify({'message': 'Booking created successfully!', 'booking_id': booking_id}), 200
+
+
+    except KeyError as e:
+        return jsonify({'error': f'Missing field: {str(e)}'}), 400
+
 
 if __name__ == '__main__':
     app.run(debug=True)
