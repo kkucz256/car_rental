@@ -134,6 +134,12 @@ class ReservationScreen(Screen):
             popup.open()
             return
 
+        if self.payment_spinner.text == "Select Payment Method":
+            popup = Popup(title='Error', content=Label(text='You must select payment method.'),
+                          size_hint=(None, None), size=(400, 200))
+            popup.open()
+            return
+
         rental_beginning_formatted = self.format_rental_beginning(rental_beginning)
         rental_end = self.calculate_rental_end(rental_beginning, self.days)
         payment_type = self.payment_spinner.text

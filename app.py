@@ -4,17 +4,56 @@ from Car_details_class import Car_details_class
 from Car_for_list import Car_for_list
 
 app = Flask(__name__)
-db_params = {
+master_params = {
     'dbname': 'defaultdb',
     'user': 'avnadmin',
     'password': 'AVNS_QxzPpkrNJXOolRyltc4',
     'host': 'car-rental-car-rreennttaall.e.aivencloud.com',
-    'port': '22365'
+    'port': '22365',
+    'sslmode': 'require'
+
+
 }
 
-def connect_to_db():
-    conn = psycopg2.connect(**db_params)
-    return conn
+slave_params = {
+    'dbname': 'defaultdb',
+    'user': 'avnadmin',
+    'password': 'AVNS_QxzPpkrNJXOolRyltc4',
+    'host': 'pg-28700455-car-rreennttaall.e.aivencloud.com',
+    'port': '22365',
+    'sslmode': 'require'
+
+
+}
+
+def connect_to_db(type):
+    try:
+        if type == "master":
+            conn = psycopg2.connect(**master_params)
+            ssl_used = conn.get_dsn_parameters().get('sslmode', 'disable')
+            print(f"SSL mode used: {ssl_used}")
+            cur = conn.cursor()
+            cur.execute("SHOW ssl;")
+            ssl_status = cur.fetchone()[0]
+            print(f"Status SSL: {ssl_status}")
+
+            print("Connected to master database")
+            return conn
+        if type == "slave":
+            conn = psycopg2.connect(**slave_params)
+            ssl_used = conn.get_dsn_parameters().get('sslmode', 'disable')
+            print(f"SSL mode used: {ssl_used}")
+            cur = conn.cursor()
+            cur.execute("SHOW ssl;")
+            ssl_status = cur.fetchone()[0]
+            print(f"Status SSL: {ssl_status}")
+
+
+            print("Connected to slave database")
+            return conn
+
+    except Exception as e:
+        print(f"Błąd podczas łączenia z PostgreSQL: {e}")
 
 
 @app.route('/')
@@ -24,7 +63,7 @@ def index():
 
 @app.route('/cars', methods=['POST'])
 def add_car():
-    conn = connect_to_db()
+    conn = connect_to_db("master")
     cur = conn.cursor()
     data = request.get_json()
 
@@ -62,7 +101,7 @@ def add_car():
 
 @app.route('/log-in', methods=['GET'])
 def log_in():
-    conn = connect_to_db()
+    conn = connect_to_db("slave")
     cur = conn.cursor()
     data = request.get_json()
 
@@ -84,7 +123,7 @@ def log_in():
 
 @app.route('/log-in_staff', methods=['GET'])
 def log_in_staff():
-    conn = connect_to_db()
+    conn = connect_to_db("slave")
     cur = conn.cursor()
     data = request.get_json()
 
@@ -105,7 +144,7 @@ def log_in_staff():
 
 @app.route('/register', methods=['POST'])
 def register_user():
-    conn = connect_to_db()
+    conn = connect_to_db("master")
     cur = conn.cursor()
     data = request.get_json()
 
@@ -159,7 +198,7 @@ def register_user():
 def provide_cars():
     car_list = []
     try:
-        conn = connect_to_db()
+        conn = connect_to_db("slave")
         cur = conn.cursor()
         cur.execute("""SELECT car.car_id, brand.brand, color.color, car.model, car.price_per_day, car.body, 
                            car.gearbox, car.seats_no 
@@ -180,7 +219,7 @@ def provide_cars():
 @app.route('/car-details/<int:car_id>', methods=['GET'])
 def getcardetails(car_id):
     try:
-        conn = connect_to_db()
+        conn = connect_to_db("slave")
         cur = conn.cursor()
         cur.execute("""
             SELECT car.car_id, brand.brand, car.status, car.price_per_day, car.year_of_production, car.horsepower, 
@@ -205,7 +244,7 @@ def getcardetails(car_id):
 @app.route('/user-details/<int:user_id>', methods=['GET'])
 def get_user_details(user_id):
     try:
-        conn = connect_to_db()
+        conn = connect_to_db("slave")
         cur = conn.cursor()
         cur.execute("SELECT first_name, last_name FROM customer WHERE customer_id = %s", (user_id,))
         user = cur.fetchone()
@@ -220,7 +259,7 @@ def get_user_details(user_id):
 @app.route('/car-details/<int:car_id>', methods=['GET'])
 def get_car_details(car_id):
     try:
-        conn = connect_to_db()
+        conn = connect_to_db("slave")
         cur = conn.cursor()
         cur.execute("""
             SELECT brand.brand, car.model, color.color
@@ -240,7 +279,7 @@ def get_car_details(car_id):
 @app.route('/get-bookings/<int:car_id>', methods=['GET'])
 def get_bookings(car_id):
     try:
-        conn = connect_to_db()
+        conn = connect_to_db("slave")
         cur = conn.cursor()
         cur.execute("""
             SELECT rental_beginning, rental_end
@@ -266,7 +305,7 @@ def get_bookings(car_id):
 @app.route('/get-enum-values/payment_type', methods=['GET'])
 def get_payment_types():
     try:
-        conn = connect_to_db()
+        conn = connect_to_db("slave")
         cur = conn.cursor()
 
         cur.execute("SELECT unnest(enum_range(NULL::payment_type))")
@@ -289,7 +328,7 @@ def create_booking():
         payment_type = data['payment_type'].lower()
         payment_amount = data['payment_amount']
 
-        conn = connect_to_db()
+        conn = connect_to_db("master")
         cur = conn.cursor()
 
         cur.execute("""

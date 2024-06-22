@@ -90,12 +90,25 @@ class CarDetails(Screen):
         booking_lbl =CustomLabel(text="Current bookings:")
         string_text="empty"
         bookings = self.fetch_bookings(self.car_id)
+        scroll_layout = GridLayout(cols=1, size_hint_y=None, padding=(10, 10), spacing=10)
+        scroll_layout.bind(minimum_height=scroll_layout.setter('height'))
+
+        # Konfiguracja ScrollView
+        scroll_for_status = ScrollView(size_hint=(None, None),size=(400, 150), do_scroll_x=False, do_scroll_y=True)
+
+
         if bookings:
-            bookings_info = "\n".join([f"From: {booking['rental_beginning']} to {booking['rental_end']}" for booking in bookings])
-            string_text = f"\n{bookings_info}"
+            for booking in bookings:
+                string_text = "\n----------------------------------------------------------------------------------------\n"
+                string_text += f"From: {booking['rental_beginning']} to {booking['rental_end']}" + "\n----------------------------------------------------------------------------------------\n"
+                scroll_layout.add_widget(Label(text=string_text,size_hint_x=1, size_hint_y=None, height=50, halign='center', valign='middle'))
+
+            scroll_for_status.add_widget(scroll_layout)
         else:
             string_text = "No bookings for the car yet."
-        status_label = CustomLabel(text=string_text)
+            scroll_layout.add_widget(CustomLabel(text=string_text, size_hint_x=1, size_hint_y=None, height=50))
+            scroll_for_status.add_widget(scroll_layout)
+
 
 
         price_deposit_label = CustomLabel(
@@ -104,7 +117,7 @@ class CarDetails(Screen):
         )
         upper_right_layout.add_widget(main_info_label)
         upper_right_layout.add_widget(booking_lbl)
-        upper_right_layout.add_widget(status_label)
+        upper_right_layout.add_widget(scroll_for_status)
         upper_right_layout.add_widget(price_deposit_label)
 
 

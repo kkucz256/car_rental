@@ -8,5 +8,12 @@
       <jdbc-url>jdbc:postgresql://car-rental-car-rreennttaall.e.aivencloud.com:22365/defaultdb?sslmode=require</jdbc-url>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
+    <data-source source="LOCAL" name="slave_db" uuid="9855c7e7-b42b-405a-b462-4990afc07981">
+      <driver-ref>postgresql</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>org.postgresql.Driver</jdbc-driver>
+      <jdbc-url>jdbc:postgresql://pg-28700455-car-rreennttaall.e.aivencloud.com:22365/defaultdb</jdbc-url>
+      <working-dir>$ProjectFileDir$</working-dir>
+    </data-source>
   </component>
 </project>
