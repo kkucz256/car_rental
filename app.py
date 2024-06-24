@@ -58,7 +58,7 @@ def connect_to_db(type):
 
 @app.route('/')
 def index():
-    return 'Witaj w API wypożyczalni!'
+    return 'API connected'
 
 
 @app.route('/cars', methods=['POST'])
@@ -128,9 +128,10 @@ def log_in_staff():
     data = request.get_json()
 
     cur.execute("SELECT password FROM staff WHERE mail = %s", (data['email'],))
+    # query = "SELECT password FROM staff WHERE mail = {}".format(data['email'])
+    # cur.execute(query)
     try:
         db_password = cur.fetchone()[0]
-        print(db_password, data['password'])
         if db_password == data['password']:
             return jsonify({'success': True}), 200
         else:
@@ -184,10 +185,18 @@ def register_user():
     if existing_customer:
         return jsonify({'error': 'Customer already exists'}), 400
 
-    cur.execute("""INSERT INTO customer (address_id, first_name, last_name, mail, password, date_of_birth, phone_no) 
+    cur.execute("""INSERT INTO customer (address_id, first_name, last_name, mail, password, date_of_birth, phone_no)
                    VALUES (%s, %s, %s, %s, %s, %s, %s)""",
                 (address_id, data['first_name'], data['last_name'], data['email'], data['password'],
                  data['date_of_birth'], data['phone_number']))
+
+    # phone_number = data['phone_number']
+    # query = f"""
+    # INSERT INTO customer (address_id, first_name, last_name, mail, password, date_of_birth, phone_no)
+    # VALUES ({address_id}, '{data['first_name']}', '{data['last_name']}', '{data['email']}', '{data['password']}', '{data['date_of_birth']}', '{data['phone_number']}')
+    # SELECT FROM customer WHERE phone_no = {phone_number}
+    # """
+    cur.execute(query)
 
     conn.commit()
 
@@ -276,6 +285,7 @@ def get_car_details(car_id):
             return jsonify({'error': 'Car not found'}), 404
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
 @app.route('/get-bookings/<int:car_id>', methods=['GET'])
 def get_bookings(car_id):
     try:
@@ -329,6 +339,7 @@ def create_booking():
         payment_amount = data['payment_amount']
 
         conn = connect_to_db("master")
+        conn.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_READ_COMMITTED)
         cur = conn.cursor()
 
         cur.execute("""

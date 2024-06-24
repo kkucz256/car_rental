@@ -11,7 +11,6 @@ from kivy.uix.image import Image
 from kivy.uix.image import AsyncImage
 import sys
 
-
 sys.path.append('customclasses')
 from Custom_button import CustomButton
 from Custom_label import CustomLabel
@@ -87,29 +86,27 @@ class CarDetails(Screen):
             height=150,
             valign='bottom'
         )
-        booking_lbl =CustomLabel(text="Current bookings:")
-        string_text="empty"
+        booking_lbl = CustomLabel(text="Current bookings:")
+        string_text = "empty"
         bookings = self.fetch_bookings(self.car_id)
         scroll_layout = GridLayout(cols=1, size_hint_y=None, padding=(10, 10), spacing=10)
         scroll_layout.bind(minimum_height=scroll_layout.setter('height'))
 
-        # Konfiguracja ScrollView
-        scroll_for_status = ScrollView(size_hint=(None, None),size=(400, 150), do_scroll_x=False, do_scroll_y=True)
-
+        scroll_for_status = ScrollView(size_hint=(None, None), size=(400, 150), do_scroll_x=False, do_scroll_y=True)
 
         if bookings:
             for booking in bookings:
                 string_text = "\n----------------------------------------------------------------------------------------\n"
                 string_text += f"From: {booking['rental_beginning']} to {booking['rental_end']}" + "\n----------------------------------------------------------------------------------------\n"
-                scroll_layout.add_widget(Label(text=string_text,size_hint_x=1, size_hint_y=None, height=50, halign='center', valign='middle'))
+                scroll_layout.add_widget(
+                    Label(text=string_text, size_hint_x=1, size_hint_y=None, height=50, halign='center',
+                          valign='middle'))
 
             scroll_for_status.add_widget(scroll_layout)
         else:
             string_text = "No bookings for the car yet."
             scroll_layout.add_widget(CustomLabel(text=string_text, size_hint_x=1, size_hint_y=None, height=50))
             scroll_for_status.add_widget(scroll_layout)
-
-
 
         price_deposit_label = CustomLabel(
             text=f"Price per Day: ${self.car.price_per_day} Deposit: ${self.car.deposit}",
@@ -119,9 +116,6 @@ class CarDetails(Screen):
         upper_right_layout.add_widget(booking_lbl)
         upper_right_layout.add_widget(scroll_for_status)
         upper_right_layout.add_widget(price_deposit_label)
-
-
-
 
         for detail_key, detail_value in self.details_dict.items():
             upper_right_layout.add_widget(
@@ -139,7 +133,6 @@ class CarDetails(Screen):
         buttons_layout = GridLayout(cols=2, size_hint_y=None, spacing=10, height=50,
                                     pos_hint={'center_x': x_center, 'center_y': 0.05})
         buttons_layout.add_widget(CustomButton(text='Back', on_press=self.go_back))
-
 
         self.layout.add_widget(upper_right_layout)
         if not self.staff_access:
@@ -171,7 +164,6 @@ class CarDetails(Screen):
 
     def set_staff_access(self, access):
         self.staff_access = access
-
 
     def go_back(self, instance):
         self.manager.current = 'user'
@@ -215,4 +207,3 @@ class CarDetails(Screen):
         except requests.exceptions.RequestException as e:
             print(f"Error fetching bookings: {str(e)}")
             return []
-
