@@ -1,5 +1,6 @@
 import kivy
 from kivy.config import Config
+
 kivy.config.Config.set('graphics', 'resizable', '0')
 kivy.config.Config.set('kivy', 'window_icon', 'images/car.jpg')
 
@@ -13,9 +14,6 @@ from Login_Screen import *
 from User_Screen import UserScreen
 from Car_details import CarDetails
 from Reservation_Screen import ReservationScreen
-
-
-
 
 
 class Car_rental(App):
@@ -40,6 +38,7 @@ class Car_rental(App):
         self.screen_manager.add_widget(reservation_screen)
 
         return self.screen_manager
+
 
 if __name__ == '__main__':
     Car_rental().run()

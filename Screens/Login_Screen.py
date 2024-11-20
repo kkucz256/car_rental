@@ -10,11 +10,11 @@ from kivy.uix.image import Image
 import hashlib
 import sys
 
-
 sys.path.append('customclasses')
 from Custom_button import CustomButton
 from Custom_label import CustomLabel
 from Custom_input import CustomTextInput
+
 
 def sha256_hash(data):
     hasher = hashlib.sha256()
@@ -158,7 +158,6 @@ class LoginScreen(Screen):
     def clear_text_fields(self):
         self.username_text.text = ''
         self.password_text.text = ''
-
 
 
 class RegisterScreen(Screen):

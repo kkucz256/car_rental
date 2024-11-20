@@ -12,7 +12,6 @@ master_params = {
     'port': '22365',
     'sslmode': 'require'
 
-
 }
 
 slave_params = {
@@ -23,8 +22,8 @@ slave_params = {
     'port': '22365',
     'sslmode': 'require'
 
-
 }
+
 
 def connect_to_db(type):
     try:
@@ -47,7 +46,6 @@ def connect_to_db(type):
             cur.execute("SHOW ssl;")
             ssl_status = cur.fetchone()[0]
             print(f"Status SSL: {ssl_status}")
-
 
             print("Connected to slave database")
             return conn
@@ -120,7 +118,6 @@ def log_in():
         conn.close()
 
 
-
 @app.route('/log-in_staff', methods=['GET'])
 def log_in_staff():
     conn = connect_to_db("slave")
@@ -170,7 +167,7 @@ def register_user():
         INSERT INTO address (postal_code, city_id, address_1, address_2, country_id)
         VALUES (%s, %s, %s, %s, %s) RETURNING address_id
     """, (
-    data['address']['post_code'], city_id, data['address']['address_1'], data['address']['address_2'], country_id))
+        data['address']['post_code'], city_id, data['address']['address_1'], data['address']['address_2'], country_id))
 
     address_id = cur.fetchone()[0]
 
@@ -250,6 +247,7 @@ def getcardetails(car_id):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+
 @app.route('/user-details/<int:user_id>', methods=['GET'])
 def get_user_details(user_id):
     try:
@@ -264,6 +262,7 @@ def get_user_details(user_id):
             return jsonify({'error': 'User not found'}), 404
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
 
 @app.route('/car-details/<int:car_id>', methods=['GET'])
 def get_car_details(car_id):
@@ -285,6 +284,7 @@ def get_car_details(car_id):
             return jsonify({'error': 'Car not found'}), 404
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
 
 @app.route('/get-bookings/<int:car_id>', methods=['GET'])
 def get_bookings(car_id):
@@ -312,6 +312,7 @@ def get_bookings(car_id):
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+
 @app.route('/get-enum-values/payment_type', methods=['GET'])
 def get_payment_types():
     try:
@@ -325,6 +326,7 @@ def get_payment_types():
         return jsonify({'values': payment_types}), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
 
 @app.route('/create-booking', methods=['POST'])
 def create_booking():
@@ -362,7 +364,6 @@ def create_booking():
                 'end_date': existing_reservation[1]
             }), 201
 
-
         cur.execute("""
                   INSERT INTO payment (customer_id, type, amount, payment_date)
                   VALUES (%s, %s, %s, NOW())
@@ -371,7 +372,6 @@ def create_booking():
         payment_id = cur.fetchone()[0]
 
         print(f"Payment ID: {payment_id}")
-
 
         cur.execute("""
                   INSERT INTO booking (customer_id, car_id, payment_id, rental_days, rental_beginning, rental_end)

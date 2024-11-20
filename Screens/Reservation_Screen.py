@@ -160,7 +160,8 @@ class ReservationScreen(Screen):
             response.raise_for_status()
             if response.status_code == 200:
                 booking_id = response.json().get('booking_id')
-                popup = Popup(title='Success', content=Label(text=f'Booking created successfully!\nBooking ID: {booking_id}'),
+                popup = Popup(title='Success',
+                              content=Label(text=f'Booking created successfully!\nBooking ID: {booking_id}'),
                               size_hint=(None, None), size=(400, 200))
                 popup.open()
             elif response.status_code == 201:

@@ -46,8 +46,8 @@ class UserScreen(Screen):
         self.img.pos_hint = {'center_x': 0.09, 'center_y': 0.9}
         self.clear_widgets()
 
-        scrollview = ScrollView(size_hint=(None, None), size=(1000, 800),do_scroll_x=False, do_scroll_y=True, pos_hint={'center_x': 0.68, 'center_y': 0.4})
-
+        scrollview = ScrollView(size_hint=(None, None), size=(1000, 800), do_scroll_x=False, do_scroll_y=True,
+                                pos_hint={'center_x': 0.68, 'center_y': 0.4})
 
         car_list_layout = GridLayout(cols=1, size_hint_x=0.8, size_hint_y=1.3, padding=10, spacing=10)
         car_list_layout.bind(minimum_height=car_list_layout.setter('height'))
@@ -97,7 +97,6 @@ class UserScreen(Screen):
 
         spinner.bind(text=self.on_spinner_text_changed)
 
-
         self.filter_brand_input = CustomTextInput(hint_text='Enter brand')
         self.filter_body_input = CustomTextInput(hint_text='Enter body type')
         self.filter_seats_input = CustomTextInput(hint_text='Enter number of seats')
@@ -108,7 +107,6 @@ class UserScreen(Screen):
         if self.staff_access:
             add_button = CustomButton(text='Add')
             add_button.bind(on_press=self.car_adding)
-
 
         filter_button.bind(on_press=self.filter_cars)
         default_button.bind(on_press=self.default)
@@ -137,7 +135,6 @@ class UserScreen(Screen):
         popup = Popup(title=title, content=Label(text=message), size_hint=(None, None), size=(400, 200))
         popup.open()
 
-
     def on_pre_enter(self):
         Window.size = (1280, 720)
         Window.position = 'custom'
@@ -156,6 +153,7 @@ class UserScreen(Screen):
 
     def car_adding(self, instance):
         self.manager.current = 'add'
+
     def go_back(self, instance):
         if self.staff_access:
             self.manager.current = 'staff'

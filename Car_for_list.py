@@ -8,4 +8,3 @@ class Car_for_list():
         self.body = body
         self.gearbox = gearbox
         self.places = places
-
